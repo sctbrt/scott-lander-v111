@@ -1,9 +1,11 @@
 /* ==========================================================================
-   Scott Lander v1.1.1 — app.js
-   - Clean theme system (time-based default 9am–6pm local; manual override persists)
-   - Prelude boot sequence (2–3s feel; runs once per tab/session)
-   - Route handling (#field-notes as a “page”)
-   - Field Notes feed (Notion via Splitbee API) + on-site modal (no Notion app hijack)
+   Scott Lander v1.2.0 — app.js
+   Enhanced with:
+   - Scroll-triggered animations
+   - Subtle parallax effects (desktop)
+   - 3D card tilt on hover
+   - Bottom sheet modal (mobile)
+   - Performance optimizations
    ========================================================================== */
 
 (() => {
@@ -13,6 +15,9 @@
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   const root = document.documentElement;
+  const isMobile = () => window.innerWidth < 768;
+  const prefersReducedMotion = () => 
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ============================
      Theme + asset swapping
@@ -34,15 +39,12 @@
   const writeTheme = (v) => {
     try {
       localStorage.setItem(THEME_KEY, v);
-    } catch {
-      // ignore
-    }
+    } catch {}
   };
 
-  // Local timezone default: light between 09:00–17:59, dark otherwise.
   const themeByLocalTime = () => {
     try {
-      const hour = new Date().getHours(); // local tz
+      const hour = new Date().getHours();
       const isDay = hour >= 9 && hour < 18;
       return isDay ? "light" : "dark";
     } catch {
@@ -51,7 +53,6 @@
   };
 
   const swapThemeAssets = (theme) => {
-    // Swaps any img with data-src-light + data-src-dark
     $$("img[data-src-light][data-src-dark]").forEach((img) => {
       const next =
         theme === "dark"
@@ -60,7 +61,6 @@
       if (next) img.src = next;
     });
 
-    // Field Notes mark is special: uses separate files
     const fnMark = $(".field-notes-mark");
     if (fnMark) {
       fnMark.src =
@@ -72,7 +72,9 @@
 
   const applyTheme = (theme) => {
     root.setAttribute("data-theme", theme);
+    root.classList.add('theme-transitioning');
     swapThemeAssets(theme);
+    setTimeout(() => root.classList.remove('theme-transitioning'), 400);
   };
 
   const initTheme = () => {
@@ -80,7 +82,6 @@
     const initial = stored || themeByLocalTime();
     applyTheme(initial);
 
-    // Optional: if no stored preference, follow OS changes BUT time remains primary.
     if (!stored && window.matchMedia) {
       const mq = window.matchMedia("(prefers-color-scheme: dark)");
       const onChange = () => applyTheme(themeByLocalTime());
@@ -100,7 +101,7 @@
   };
 
   /* ============================
-     Route handling (#field-notes)
+     Route handling
      ============================ */
 
   const applyRoute = () => {
@@ -123,61 +124,44 @@
     if (!brand) return;
 
     brand.addEventListener("click", (e) => {
-      // If we're already on this page, do a hard refresh.
-      // If repo is in a subpath on GitHub Pages, "./" still resolves correctly.
       e.preventDefault();
       window.location.href = "./";
-      // If you're already at "./", force reload:
       setTimeout(() => window.location.reload(), 0);
     });
   };
 
   /* ============================
      Prelude / Boot Sequence
-     - Runs once per tab (sessionStorage)
-     - Desired feel: ~2–3 seconds
-     - Sequence:
-       1) All off
-       2) Amber pulses during load
-       3) Green confirmation flash when ready
-       4) All three flash together once
-       5) Fade out → reveal page
+     Optimized for 2-3 seconds
      ============================ */
 
   const initPrelude = () => {
     const prelude = $("#prelude");
     if (!prelude) return;
 
-    // Run once per tab/session
     try {
       if (sessionStorage.getItem("sb_booted") === "1") {
         prelude.remove();
         return;
       }
       sessionStorage.setItem("sb_booted", "1");
-    } catch {
-      // If blocked, still run
-    }
+    } catch {}
 
     const setState = (state) => prelude.setAttribute("data-state", state);
 
-    // Timing tuned for "2–3 full seconds"
+    // Optimized timing for 2-3 second feel
     const T = {
-      intro: 180,       // indicator presence
-      loadingMin: 1700, // amber pulse dwell
-      ready: 520,       // green confirm
-      allflash: 380,    // all three flash
-      reveal: 460,      // mark/wordmark focus
-      exit: 520,        // fade out
-      hardCap: 5200     // failsafe
+      intro: 150,
+      loadingMin: 1200,
+      ready: 400,
+      allflash: 300,
+      reveal: 400,
+      exit: 450
     };
 
     prelude.setAttribute("aria-hidden", "false");
-
-    // Start at "intro" (all off baseline)
     setState("intro");
 
-    // Enter loading pulse quickly
     setTimeout(() => setState("loading"), T.intro);
 
     let finished = false;
@@ -186,55 +170,131 @@
       if (finished) return;
       finished = true;
 
-      // Ready → allflash → reveal → exit
       setState("ready");
-
       setTimeout(() => {
         setState("allflash");
         setTimeout(() => {
           setState("reveal");
           setTimeout(() => {
             setState("exit");
-            setTimeout(() => {
-              prelude.remove();
-            }, T.exit + 40);
+            setTimeout(() => prelude.remove(), T.exit + 50);
           }, T.reveal);
         }, T.allflash);
       }, T.ready);
     };
 
-    // Guarantee minimum time on the prelude:
     const minGate = T.intro + T.loadingMin;
 
-    // When the page is loaded:
-    const onLoaded = () => {
-      // Don’t finish before min gate; schedule finish at/after gate.
-      // (If load happens after gate, this executes immediately.)
-      const now = performance.now ? performance.now() : 0;
-      // We can't perfectly align "start time" across all browsers in a trivial way,
-      // but the minGate timeout below ensures the minimum dwell regardless.
-      setTimeout(finish, 0);
-    };
-
-    // After min gate, if already loaded, finish; otherwise wait for load.
     setTimeout(() => {
       if (document.readyState === "complete") finish();
       else window.addEventListener("load", finish, { once: true });
     }, minGate);
 
-    // Fail-safe hard cap
-    setTimeout(finish, T.hardCap);
+    setTimeout(finish, 3200); // Hard cap
   };
 
   /* ============================
-     Field Notes — Notion (Option A)
-     - Uses splitbee's public notion API proxy:
-       https://notion-api.splitbee.io
-     - Filter to Public-only (your column "Public")
-     - Modal opens on-site (prevents Notion app hijack)
+     Scroll Animations
+     Fade in elements as they enter viewport
      ============================ */
 
-  // Your database/page id (from your shared link)
+  const initScrollAnimations = () => {
+    if (prefersReducedMotion()) return;
+
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px"
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, observerOptions);
+
+    $$('.scroll-fade').forEach(el => observer.observe(el));
+
+    // Stagger cards animation
+    const cards = $$('.card');
+    if (cards.length) {
+      cards.forEach((card, i) => {
+        card.style.transitionDelay = `${i * 50}ms`;
+      });
+    }
+  };
+
+  /* ============================
+     Parallax Effect (Desktop only)
+     Subtle background movement
+     ============================ */
+
+  const initParallax = () => {
+    if (isMobile() || prefersReducedMotion()) return;
+
+    const parallaxElements = $$('[data-parallax]');
+    if (!parallaxElements.length) return;
+
+    let ticking = false;
+
+    const updateParallax = () => {
+      const scrolled = window.pageYOffset;
+
+      parallaxElements.forEach(el => {
+        const speed = parseFloat(el.getAttribute('data-parallax')) || 0.5;
+        const yPos = -(scrolled * speed);
+        el.style.transform = `translate3d(0, ${yPos}px, 0)`;
+      });
+
+      ticking = false;
+    };
+
+    const requestTick = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', requestTick, { passive: true });
+  };
+
+  /* ============================
+     3D Card Tilt Effect (Desktop)
+     Subtle perspective shift on hover
+     ============================ */
+
+  const init3DCardTilt = () => {
+    if (isMobile() || prefersReducedMotion()) return;
+
+    const cards = $$('.card');
+
+    cards.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -5; // Max 5deg
+        const rotateY = ((x - centerX) / centerX) * 5;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+  };
+
+  /* ============================
+     Field Notes — Notion API
+     ============================ */
+
   const FIELDNOTES_TABLE_ID = "2ea3c4a766e480b7a46ed6bb8d6cde82";
   const API = (id) => `https://notion-api.splitbee.io/v1/table/${id}`;
 
@@ -263,7 +323,7 @@
 
   const isPublic = (r) => {
     const v = r?.Public;
-    if (v === undefined || v === null || v === "") return false; // enforce Public-only
+    if (v === undefined || v === null || v === "") return false;
     if (typeof v === "boolean") return v;
     if (typeof v === "number") return v === 1;
     const s = String(v).trim().toLowerCase();
@@ -284,7 +344,6 @@
     const m = row?.Media;
     if (!m) return "";
 
-    // could be string, array, or object depending on notion field type
     if (typeof m === "string") return m;
 
     if (Array.isArray(m) && m.length) {
@@ -304,14 +363,12 @@
     return u.endsWith(".mp4") || u.endsWith(".mov") || u.includes("video");
   };
 
-  // Modular size pattern (3 sizes). This is intentionally deterministic.
   const pickSize = (i, hasMedia) => {
     const cycle = hasMedia ? ["l", "m", "m", "s", "m"] : ["m", "s", "m", "s", "m"];
     return cycle[i % cycle.length];
   };
 
   const getNotionUrl = (row) => {
-    // splitbee often returns __url; keep robust.
     return row?.__url || row?.URL || row?.Url || row?.Link || "";
   };
 
@@ -327,11 +384,10 @@
     const size = pickSize(index, hasMedia);
 
     if (!hasMedia) {
-      // Text card: "fills" like an image (type-centered, ends low)
       const quote = excerpt || title;
 
       return `
-        <article class="card ${size} text" role="listitem">
+        <article class="card ${size} text scroll-fade" role="listitem">
           <button class="card-link"
             type="button"
             data-notion-url="${escapeHtml(notionUrl)}"
@@ -355,11 +411,11 @@
     }
 
     const mediaEl = isVideo(media)
-      ? `<video class="card-media" src="${escapeHtml(media)}" muted playsinline preload="metadata"></video>`
+      ? `<video class="card-media" src="${escapeHtml(media)}" muted playsinline preload="metadata" loading="lazy"></video>`
       : `<img class="card-media" src="${escapeHtml(media)}" alt="" loading="lazy" />`;
 
     return `
-      <article class="card ${size} media" role="listitem">
+      <article class="card ${size} media scroll-fade" role="listitem">
         <button class="card-link"
           type="button"
           data-notion-url="${escapeHtml(notionUrl)}"
@@ -379,7 +435,23 @@
     `;
   };
 
+  /* ============================
+     Modal Systems
+     Desktop: Center modal
+     Mobile: Bottom sheet
+     ============================ */
+
   const openModal = ({ title, type, date, excerpt, notionUrl }) => {
+    const mobile = isMobile();
+
+    if (mobile) {
+      openBottomSheet({ title, type, date, excerpt, notionUrl });
+    } else {
+      openCenterModal({ title, type, date, excerpt, notionUrl });
+    }
+  };
+
+  const openCenterModal = ({ title, type, date, excerpt, notionUrl }) => {
     const modal = $("#fieldNotesModal");
     const content = $("#fieldNotesModalContent");
     const closeBtn = $(".modal-close", modal);
@@ -398,23 +470,60 @@
 
     modal.setAttribute("aria-hidden", "false");
     modal.classList.add("is-open");
+    document.body.style.overflow = 'hidden';
 
     const close = () => {
       modal.setAttribute("aria-hidden", "true");
       modal.classList.remove("is-open");
+      document.body.style.overflow = '';
     };
 
-    // One-time bindings per open
     const onBackdrop = (e) => {
-      if (e.target === modal) close();
+      if (e.target.classList.contains('modal-backdrop')) close();
     };
+
     const onKey = (e) => {
       if (e.key === "Escape") close();
     };
 
     closeBtn.onclick = close;
     modal.onclick = onBackdrop;
-    window.addEventListener("keydown", onKey, { once: true });
+    document.addEventListener("keydown", onKey, { once: true });
+  };
+
+  const openBottomSheet = ({ title, type, date, excerpt, notionUrl }) => {
+    const sheet = $("#fieldNotesSheet");
+    const content = $("#fieldNotesSheetContent");
+    const closeBtn = $(".sheet-close", sheet);
+    const original = $("#fieldNotesSheetOriginal");
+
+    if (!sheet || !content || !closeBtn || !original) return;
+
+    content.innerHTML = `
+      <div class="fn-modal-kicker">${escapeHtml(type || "Field note")}</div>
+      <h3 class="fn-modal-title">${escapeHtml(title || "Field note")}</h3>
+      <div class="fn-modal-date">${escapeHtml(fmtDate(date))}</div>
+      <div class="fn-modal-body">${escapeHtml(excerpt || "")}</div>
+    `;
+
+    original.href = notionUrl || "#";
+
+    sheet.setAttribute("aria-hidden", "false");
+    sheet.classList.add("is-open");
+    document.body.style.overflow = 'hidden';
+
+    const close = () => {
+      sheet.setAttribute("aria-hidden", "true");
+      sheet.classList.remove("is-open");
+      document.body.style.overflow = '';
+    };
+
+    const onBackdrop = (e) => {
+      if (e.target.classList.contains('sheet-backdrop')) close();
+    };
+
+    closeBtn.onclick = close;
+    sheet.onclick = onBackdrop;
   };
 
   async function loadFieldNotes() {
@@ -435,7 +544,7 @@
       posts.sort((a, b) => {
         const da = new Date(a?.Published || a?.Date || a?.Created || 0).getTime();
         const db = new Date(b?.Published || b?.Date || b?.Created || 0).getTime();
-        return db - da; // newest first
+        return db - da;
       });
 
       if (!posts.length) {
@@ -447,10 +556,9 @@
         return;
       }
 
-      // Render list
       feedEl.innerHTML = posts.map(renderCard).join("");
 
-      // Bind modal opens (prevent Notion app hijack by not using <a href>)
+      // Bind modal opens
       $$(".card-link", feedEl).forEach((btn) => {
         btn.addEventListener("click", () => {
           const title = btn.getAttribute("data-title") || "";
@@ -461,18 +569,25 @@
           openModal({ title, type, date, excerpt, notionUrl });
         });
       });
+
+      // Re-observe new cards for scroll animations
+      initScrollAnimations();
+      
+      // Apply 3D tilt to new cards
+      setTimeout(init3DCardTilt, 100);
+
     } catch (err) {
       console.error(err);
-      $("#fieldNotesFeed").innerHTML = `
+      feedEl.innerHTML = `
         <div class="field-notes-empty">
-          Could not load Field Notes right now. (Check that your Notion view is public and the table id is correct.)
+          Could not load Field Notes right now.
         </div>
       `;
     }
   }
 
   /* ============================
-     Init (order matters)
+     Init
      ============================ */
 
   const init = () => {
@@ -480,7 +595,13 @@
     initRouting();
     initBrandRefresh();
     initPrelude();
-    loadFieldNotes();
+    initScrollAnimations();
+    initParallax();
+    
+    loadFieldNotes().then(() => {
+      // After cards load, add 3D tilt effect
+      setTimeout(init3DCardTilt, 200);
+    });
   };
 
   if (document.readyState === "loading") {

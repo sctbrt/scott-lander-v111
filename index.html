@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Systems that make the day run clean. Operations and brand systems." />
   <title>Scott Bertrand</title>
 
   <!-- Fonts -->
@@ -14,7 +15,7 @@
     rel="stylesheet"
   >
 
-  <!-- Favicon (minimal dot, neutral) -->
+  <!-- Favicon -->
   <link
     rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='6' fill='%23000'/%3E%3C/svg%3E"
@@ -32,7 +33,7 @@
   <div id="prelude" aria-hidden="true">
     <div class="prelude-card">
 
-      <!-- Indicators (reason to exist: system state) -->
+      <!-- Indicators -->
       <div class="prelude-indicators" aria-hidden="true">
         <span class="dot red"></span>
         <span class="dot amber"></span>
@@ -40,7 +41,7 @@
       </div>
 
       <!-- Visual Mark -->
-      <div class="prelude-mark">
+      <div class="prelude-mark oofo">
         <img
           src="./assets/scott-visual-black.png"
           data-src-light="./assets/scott-visual-black.png"
@@ -50,7 +51,7 @@
       </div>
 
       <!-- Wordmark -->
-      <div class="prelude-wordmark">
+      <div class="prelude-wordmark oofo">
         <img
           src="./assets/scott-wordmark-black.png"
           data-src-light="./assets/scott-wordmark-black.png"
@@ -71,7 +72,7 @@
     <header class="site-header">
       <div class="topbar">
 
-        <!-- Brand (refreshes page) -->
+        <!-- Brand -->
         <a class="brand" href="./" aria-label="Refresh homepage">
           <span class="brand-mark">
             <img
@@ -98,7 +99,7 @@
           type="button"
           aria-label="Toggle theme"
         >
-          Theme
+          <span class="chip-label">Theme</span>
         </button>
 
         <!-- Field Notes Nav -->
@@ -107,7 +108,7 @@
           href="#field-notes"
           aria-label="View Field Notes"
         >
-          Field Notes
+          <span class="chip-label">Field Notes</span>
         </a>
 
         <!-- Status Indicator -->
@@ -126,18 +127,21 @@
     <main>
 
       <!-- Hero (hidden on Field Notes route) -->
-      <section class="hero" aria-label="Introduction">
-        <h1 class="hero-title">Systems that make the day run clean.</h1>
-        <p class="hero-sub">
-          I work across operations and brand systems to reduce friction where
-          performance slips quietly — at the counter, in handoffs, and in the
-          routines teams rely on.
-        </p>
+      <section class="hero scroll-fade" aria-label="Introduction">
+        <div class="hero-bg-layer" data-parallax="0.3"></div>
+        <div class="hero-content">
+          <h1 class="hero-title">Systems that make the day run clean.</h1>
+          <p class="hero-sub">
+            I work across operations and brand systems to reduce friction where
+            performance slips quietly — at the counter, in handoffs, and in the
+            routines teams rely on.
+          </p>
 
-        <div class="hero-actions">
-          <a href="mailto:hello@scottbertrand.com" class="btn">
-            Contact
-          </a>
+          <div class="hero-actions">
+            <a href="mailto:hello@scottbertrand.com" class="btn">
+              Contact
+            </a>
+          </div>
         </div>
       </section>
 
@@ -145,7 +149,7 @@
            Field Notes (Primary Page)
            ========================= -->
       <section
-        class="field-notes"
+        class="field-notes scroll-fade"
         id="field-notes"
         aria-label="Field Notes"
       >
@@ -177,11 +181,16 @@
   </div>
 
   <!-- =========================
-       Field Notes Modal
+       Field Notes Modal (Desktop)
        ========================= -->
-  <div id="fieldNotesModal" aria-hidden="true">
+  <div id="fieldNotesModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-backdrop"></div>
     <div class="modal-card">
-      <button class="modal-close" type="button">Close</button>
+      <button class="modal-close" type="button" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
       <div class="modal-content" id="fieldNotesModalContent"></div>
       <div class="modal-actions">
         <a
@@ -190,13 +199,36 @@
           target="_blank"
           rel="noopener"
         >
-          Open original ↗
+          Open original →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       Field Notes Bottom Sheet (Mobile)
+       ========================= -->
+  <div id="fieldNotesSheet" class="bottom-sheet" aria-hidden="true">
+    <div class="sheet-backdrop"></div>
+    <div class="sheet-content">
+      <div class="sheet-handle"></div>
+      <button class="sheet-close" type="button" aria-label="Close">Close</button>
+      <div class="sheet-body" id="fieldNotesSheetContent"></div>
+      <div class="sheet-actions">
+        <a
+          id="fieldNotesSheetOriginal"
+          href="#"
+          target="_blank"
+          rel="noopener"
+          class="btn"
+        >
+          Open original →
         </a>
       </div>
     </div>
   </div>
 
   <!-- Scripts -->
-  <script src="./js/app.js" defer></script>
+  <script src="./js/app.js"></script>
 </body>
 </html>
