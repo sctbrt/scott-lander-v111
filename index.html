@@ -299,12 +299,24 @@
 
     #prelude.is-exiting {
       opacity: 0;
-      transition: opacity 520ms ease;
+      pointer-events: none;
+      transition: opacity 420ms ease;
     }
 
+    /* Clean exit: fade the card + contents so there is no “ghost” mid-transition */
     #prelude.is-exiting .prelude-card {
-      transform: scale(0.985);
-      transition: transform 320ms ease;
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+      transition: opacity 320ms ease, transform 320ms ease;
+    }
+
+    #prelude.is-exiting .mark,
+    #prelude.is-exiting .wordmark,
+    #prelude.is-exiting .indicators {
+      opacity: 0;
+      filter: blur(0px);
+      transform: translateY(-6px) scale(0.995);
+      transition: opacity 260ms ease, transform 260ms ease;
     }
 
     /* Reduced motion: keep it tasteful */
@@ -1192,11 +1204,13 @@
 
       // Total boot time: 2s
       const totalMs = 2000;
-      const exitMs = 520;
+      const exitMs = 420;
 
       setTimeout(() => {
+        // Prevent any interaction / focus weirdness during fade-out
+        prelude.style.pointerEvents = 'none';
         prelude.classList.add('is-exiting');
-        setTimeout(() => prelude.remove(), exitMs + 200);
+        setTimeout(() => prelude.remove(), exitMs + 120);
       }, totalMs);
 
       // Load Field Notes automatically (no hash required).
@@ -1215,6 +1229,8 @@
         if (!modal || !modalContent) return;
         modal.style.display = 'none';
         modalContent.innerHTML = '';
+        // Ensure the page regains scroll on close
+        document.documentElement.style.overflow = '';
       };
 
       // If modal elements aren't present for any reason, don't break the feed.
@@ -1245,6 +1261,8 @@
           .replace('https://www.notion.so', 'https://lilac-stocking-b2d.notion.site');
 
         modal.style.display = 'block';
+        // Lock scroll while modal is open
+        document.documentElement.style.overflow = 'hidden';
       }, { capture: true });
 
       if (modalReady) {
