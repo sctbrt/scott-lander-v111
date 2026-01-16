@@ -38,21 +38,21 @@ button {
 /* THEME VARIABLES */
 :root[data-theme="light"] {
   --bg: #e8e6e0;
-  --text: #1a1a1a;
-  --muted: #5a5a5a;
-  --quiet: #8a8a8a;
-  --stroke: rgba(0,0,0,0.14);
-  --surface: rgba(0,0,0,0.04);
-  --glass: rgba(255,255,255,0.50);
+  --text: #0a0a0a;
+  --muted: #3a3a3a;
+  --quiet: #6a6a6a;
+  --stroke: rgba(0,0,0,0.20);
+  --surface: rgba(0,0,0,0.06);
+  --glass: rgba(255,255,255,0.60);
 
   --ind-red: #6b2a22;
   --ind-amber: #cc7a12;
   --ind-green: #2f8b58;
-  --glow-amber: rgba(204,122,18,0.30);
-  --glow-green: rgba(47,139,88,0.25);
+  --glow-amber: rgba(204,122,18,0.35);
+  --glow-green: rgba(47,139,88,0.30);
 
-  --shadow: 0 20px 60px rgba(0,0,0,0.14);
-  --shadow-card: 0 8px 24px rgba(0,0,0,0.10);
+  --shadow: 0 24px 72px rgba(0,0,0,0.18);
+  --shadow-card: 0 10px 32px rgba(0,0,0,0.14);
 }
 
 :root[data-theme="dark"] {
@@ -121,14 +121,14 @@ body.route-fn[data-theme="dark"] {
 /* Indicators - Vertical Pills */
 .indicator-pills {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
 }
 
 .pill {
-  width: 4px;
-  height: 24px;
-  border-radius: 2px;
+  width: 5px;
+  height: 28px;
+  border-radius: 2.5px;
   transition: opacity 320ms ease, box-shadow 320ms ease;
 }
 
@@ -161,9 +161,9 @@ body.route-fn[data-theme="dark"] {
 }
 
 /* Speaker Grille */
-.speaker-grille {
-  width: min(420px, 70vw);
-  height: min(420px, 70vw);
+#prelude .speaker-grille {
+  width: min(480px, 70vw);
+  height: min(480px, 70vw);
   border-radius: 50%;
   border: 2px solid var(--stroke);
   background: var(--surface);
@@ -172,44 +172,40 @@ body.route-fn[data-theme="dark"] {
   overflow: hidden;
   box-shadow: var(--shadow);
   opacity: 0;
-  filter: blur(20px);
-  transform: scale(0.96);
-  transition: opacity 680ms ease, filter 680ms ease, transform 680ms ease;
+  filter: blur(24px);
+  transform: scale(0.95);
+  transition: opacity 800ms ease, filter 800ms ease, transform 800ms ease;
 }
 
-.speaker-grille img {
-  width: 85%;
-  height: 85%;
+#prelude .speaker-grille img {
+  width: 88%;
+  height: 88%;
   object-fit: contain;
-  opacity: 0.96;
 }
 
-#prelude[data-phase="reveal"] .speaker-grille,
-#prelude[data-phase="exit"] .speaker-grille {
+#prelude[data-phase="reveal"] .speaker-grille {
   opacity: 1;
-  filter: blur(0);
+  filter: blur(0px);
   transform: scale(1);
 }
 
 /* Brand Wordmark */
-.brand-wordmark {
-  max-width: min(700px, 85vw);
+#prelude .brand-wordmark {
+  max-width: min(720px, 85vw);
   opacity: 0;
-  filter: blur(18px);
-  transform: translateY(12px) scale(0.98);
-  transition: opacity 680ms ease, filter 680ms ease, transform 680ms ease;
+  filter: blur(20px);
+  transform: translateY(16px) scale(0.96);
+  transition: opacity 800ms ease, filter 800ms ease, transform 800ms ease;
 }
 
-.brand-wordmark img {
+#prelude .brand-wordmark img {
   width: 100%;
   height: auto;
-  opacity: 0.94;
 }
 
-#prelude[data-phase="reveal"] .brand-wordmark,
-#prelude[data-phase="exit"] .brand-wordmark {
+#prelude[data-phase="reveal"] .brand-wordmark {
   opacity: 1;
-  filter: blur(0);
+  filter: blur(0px);
   transform: translateY(0) scale(1);
 }
 
@@ -242,18 +238,18 @@ body.route-fn[data-theme="dark"] {
 .brand-header {
   display: grid;
   justify-items: center;
-  gap: 40px;
+  gap: 36px;
   text-align: center;
-  margin-bottom: 80px;
+  margin-bottom: 60px;
 }
 
 .brand-header .indicator-pills {
-  margin-bottom: -20px;
+  margin-bottom: -16px;
 }
 
 .brand-header .speaker-grille {
-  width: min(380px, 65vw);
-  height: min(380px, 65vw);
+  width: min(480px, 70vw);
+  height: min(480px, 70vw);
   border-radius: 50%;
   border: 2px solid var(--stroke);
   background: var(--surface);
@@ -262,6 +258,12 @@ body.route-fn[data-theme="dark"] {
   overflow: hidden;
   box-shadow: var(--shadow);
   transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.brand-header .speaker-grille img {
+  width: 88%;
+  height: 88%;
+  object-fit: contain;
 }
 
 .brand-header .speaker-grille:hover {
@@ -274,7 +276,12 @@ body.route-fn[data-theme="dark"] {
 }
 
 .brand-header .brand-wordmark {
-  max-width: min(640px, 82vw);
+  max-width: min(720px, 85vw);
+}
+
+.brand-header .brand-wordmark img {
+  width: 100%;
+  height: auto;
 }
 
 /* Simple Nav */
