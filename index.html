@@ -1,0 +1,594 @@
+
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Scott Bertrand</title>
+
+  <!--
+    Typeface note:
+    Your wordmark spec is Alternate Gothic No1 D Regular, 94pt, tracking 100.
+    We cannot legally ship the font here; once you have a web-licensed copy,
+    add an @font-face below and point src: to your hosted .woff2.
+  -->
+
+  <style>
+    :root {
+      /* Rams/Braun-inspired neutrals */
+      --bg: #0f1113;
+      --panel: rgba(255,255,255,0.06);
+      --panel-2: rgba(255,255,255,0.08);
+      --stroke: rgba(255,255,255,0.14);
+      --stroke-2: rgba(255,255,255,0.22);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --quiet: rgba(255,255,255,0.42);
+
+      /* Indicator palette (tuned for “real” plastic/LED vibe) */
+      --red-off: #6b2a22;
+      --amber-on: #e08a1a;
+      --green-on: #3aa66a;
+
+      /* Subtle glows */
+      --glow-amber: rgba(224,138,26,0.42);
+      --glow-green: rgba(58,166,106,0.36);
+
+      /* Layout tokens */
+      --r-xl: 28px;
+      --r-lg: 20px;
+      --r-md: 14px;
+
+      --pad-1: 14px;
+      --pad-2: 18px;
+      --pad-3: 22px;
+
+      --max: 980px;
+
+      /* Indicator pill dimensions */
+      --pill-w: 10px;
+      --pill-h: 16px;
+      --pill-gap: 8px;
+
+      /* Speaker grille mark */
+      --mark: 54px;
+      --dot: 4px;
+      --dot-gap: 7px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f3f1ea;
+        --panel: rgba(0,0,0,0.05);
+        --panel-2: rgba(0,0,0,0.07);
+        --stroke: rgba(0,0,0,0.12);
+        --stroke-2: rgba(0,0,0,0.18);
+        --text: rgba(0,0,0,0.90);
+        --muted: rgba(0,0,0,0.66);
+        --quiet: rgba(0,0,0,0.40);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(255,255,255,0.08), transparent 55%),
+        radial-gradient(900px 600px at 90% 20%, rgba(255,255,255,0.06), transparent 60%),
+        radial-gradient(900px 700px at 40% 120%, rgba(255,255,255,0.05), transparent 55%),
+        var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial;
+      letter-spacing: 0.2px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ----------------------------
+       Prelude overlay
+    ----------------------------- */
+
+    #prelude {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      z-index: 9999;
+      background:
+        radial-gradient(1100px 700px at 50% 35%, rgba(255,255,255,0.08), transparent 62%),
+        radial-gradient(700px 500px at 20% 80%, rgba(255,255,255,0.05), transparent 60%),
+        var(--bg);
+      transform: translateZ(0);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 260ms ease;
+    }
+
+    #prelude.is-active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #prelude .prelude-card {
+      width: min(720px, 100%);
+      border-radius: var(--r-xl);
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
+      box-shadow:
+        0 26px 70px rgba(0,0,0,0.40),
+        inset 0 1px 0 rgba(255,255,255,0.10);
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+      align-items: center;
+      justify-items: center;
+      text-align: center;
+      transform: translateZ(0);
+    }
+
+    #prelude .mark {
+      width: var(--mark);
+      height: var(--mark);
+      border-radius: 999px;
+      position: relative;
+      background:
+        radial-gradient(circle at 45% 35%, rgba(255,255,255,0.18), transparent 45%),
+        rgba(255,255,255,0.04);
+      border: 1px solid var(--stroke);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        0 10px 30px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+
+    /* Speaker-grille illusion: precise dot lattice masked to a circle */
+    #prelude .mark::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle, rgba(0,0,0,0.85) 55%, transparent 58%) 0 0 / var(--dot-gap) var(--dot-gap);
+      opacity: 0.70;
+      filter: contrast(1.05);
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 62%, transparent 64%);
+              mask-image: radial-gradient(circle at 50% 50%, #000 62%, transparent 64%);
+    }
+
+    #prelude .wordmark {
+      font-size: clamp(34px, 6.2vw, 58px);
+      line-height: 0.92;
+      text-transform: uppercase;
+      letter-spacing: 0.10em; /* approximates tracking 100 */
+      font-weight: 700;
+      /* Swap this to your webfont once hosted */
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial;
+    }
+
+    #prelude .hook {
+      font-size: 14px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    #prelude .indicators {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--pill-gap);
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.04);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+    }
+
+    .pill {
+      width: var(--pill-w);
+      height: var(--pill-h);
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.22);
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.18),
+        inset 0 -1px 2px rgba(0,0,0,0.22);
+      background: rgba(255,255,255,0.08);
+      position: relative;
+    }
+
+    .pill::after {
+      content: "";
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      top: 2px;
+      height: 35%;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.28);
+      opacity: 0.45;
+    }
+
+    .pill.red { background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.10)), var(--red-off); opacity: 0.55; }
+    .pill.amber { background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.10)), var(--amber-on); box-shadow: 0 0 0 1px rgba(0,0,0,0.12), 0 0 18px var(--glow-amber), inset 0 1px 1px rgba(255,255,255,0.22), inset 0 -1px 2px rgba(0,0,0,0.22); }
+    .pill.green { background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.10)), var(--green-on); box-shadow: 0 0 0 1px rgba(0,0,0,0.12), 0 0 18px var(--glow-green), inset 0 1px 1px rgba(255,255,255,0.22), inset 0 -1px 2px rgba(0,0,0,0.22); }
+
+    /* Single confirmation blink for green */
+    @keyframes greenBlink {
+      0%, 60% { filter: brightness(1) saturate(1); }
+      75% { filter: brightness(1.25) saturate(1.2); box-shadow: 0 0 0 1px rgba(0,0,0,0.12), 0 0 28px rgba(58,166,106,0.55), inset 0 1px 1px rgba(255,255,255,0.24), inset 0 -1px 2px rgba(0,0,0,0.22); }
+      100% { filter: brightness(1) saturate(1); }
+    }
+
+    #prelude.is-exiting {
+      opacity: 0;
+      transition: opacity 320ms ease;
+    }
+
+    #prelude.is-exiting .prelude-card {
+      transform: scale(0.985);
+      transition: transform 320ms ease;
+    }
+
+    /* Reduced motion: keep it tasteful */
+    @media (prefers-reduced-motion: reduce) {
+      #prelude { transition: none; }
+      #prelude.is-exiting { transition: none; }
+      #prelude.is-exiting .prelude-card { transform: none; transition: none; }
+    }
+
+    /* ----------------------------
+       Site skeleton
+    ----------------------------- */
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 14px 0;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .topbar {
+      max-width: var(--max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      border-radius: 999px;
+      padding: 10px 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.04);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand .mini-mark {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.04);
+      position: relative;
+      overflow: hidden;
+    }
+    .brand .mini-mark::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(0,0,0,0.85) 55%, transparent 58%) 0 0 / 6px 6px;
+      opacity: 0.65;
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 62%, transparent 64%);
+              mask-image: radial-gradient(circle at 50% 50%, #000 62%, transparent 64%);
+    }
+
+    .brand .name {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--muted);
+    }
+
+    .legend-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.03);
+      cursor: default;
+      position: relative;
+      user-select: none;
+    }
+
+    .legend-trigger .pill { --pill-w: 8px; --pill-h: 13px; --pill-gap: 7px; }
+
+    /* Hover popup (desktop) */
+    .legend {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 10px);
+      width: min(320px, 80vw);
+      border-radius: var(--r-lg);
+      border: 1px solid var(--stroke);
+      background: rgba(18,18,18,0.68);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10);
+      padding: 12px 12px;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+      color: rgba(255,255,255,0.92);
+    }
+
+    @media (prefers-color-scheme: light) {
+      .legend { background: rgba(255,255,255,0.72); color: rgba(0,0,0,0.90); }
+    }
+
+    .legend-trigger:hover .legend {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .legend h4 {
+      margin: 0 0 8px;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: inherit;
+      opacity: 0.75;
+    }
+
+    .legend .row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 6px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+    }
+
+    @media (prefers-color-scheme: light) {
+      .legend .row { border-top: 1px solid rgba(0,0,0,0.10); }
+    }
+
+    .legend .row:first-of-type { border-top: 0; }
+    .legend .label { font-size: 12px; opacity: 0.88; }
+    .legend .desc { font-size: 12px; opacity: 0.72; }
+
+    main {
+      padding: 16px 14px 64px;
+    }
+
+    .hero {
+      max-width: var(--max);
+      margin: 18px auto 0;
+      border-radius: var(--r-xl);
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      box-shadow: 0 30px 70px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10);
+      padding: clamp(18px, 4vw, 34px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background:
+        radial-gradient(700px 320px at 15% 30%, rgba(255,255,255,0.10), transparent 60%),
+        radial-gradient(540px 280px at 80% 10%, rgba(255,255,255,0.08), transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      display: grid;
+      gap: 18px;
+    }
+
+    .headline {
+      font-size: clamp(34px, 5.2vw, 58px);
+      line-height: 1.02;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .sub {
+      margin: 0;
+      max-width: 60ch;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke-2);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .btn:hover { background: rgba(255,255,255,0.09); }
+
+    .btn.secondary {
+      border-color: var(--stroke);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 520px) {
+      :root { --mark: 46px; }
+      header { padding: 12px 12px 0; }
+      main { padding: 14px 12px 56px; }
+      .legend { display: none; } /* mobile: we can implement tap-to-open later */
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Prelude Overlay (runs once per session) -->
+  <div id="prelude" aria-hidden="true">
+    <div class="prelude-card" role="presentation">
+      <div class="mark" aria-hidden="true"></div>
+
+      <div class="indicators" aria-hidden="true">
+        <span class="pill red" title="Offline"></span>
+        <span class="pill amber" title="Active"></span>
+        <span class="pill green" id="preludeGreen" title="Ready"></span>
+      </div>
+
+      <div class="wordmark">SCOTT BERTRAND</div>
+      <div class="hook">Systems • Ops • Brand clarity</div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <header>
+      <div class="topbar">
+        <div class="brand" aria-label="Scott Bertrand">
+          <div class="mini-mark" aria-hidden="true"></div>
+          <div class="name">Scott Bertrand</div>
+        </div>
+
+        <div class="legend-trigger" aria-label="Status legend">
+          <span class="pill red" aria-hidden="true"></span>
+          <span class="pill amber" aria-hidden="true"></span>
+          <span class="pill green" aria-hidden="true"></span>
+
+          <div class="legend" role="dialog" aria-label="Status indicator legend">
+            <h4>Status indicator</h4>
+            <div class="row">
+              <div class="pill red" aria-hidden="true"></div>
+              <div>
+                <div class="label">Offline</div>
+                <div class="desc">Unavailable or not currently taking on work.</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="pill amber" aria-hidden="true"></div>
+              <div>
+                <div class="label">Active</div>
+                <div class="desc">In progress: building, iterating, or in a live engagement.</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="pill green" aria-hidden="true"></div>
+              <div>
+                <div class="label">Ready</div>
+                <div class="desc">Available for scoped work or new conversations.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-label="Intro">
+        <div class="hero-inner">
+          <h1 class="headline">Systems that make the day run clean.</h1>
+          <p class="sub">
+            I work across operations and brand systems to reduce friction where performance slips quietly—at the counter,
+            in handoffs, and in the routines teams rely on. The output is simple: clearer defaults, fewer misses, and a
+            calmer day that holds up under pressure.
+          </p>
+          <div class="cta-row">
+            <a class="btn" href="#" aria-label="Email">Contact</a>
+            <a class="btn secondary" href="#" aria-label="Work">Work</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const prelude = document.getElementById('prelude');
+      const green = document.getElementById('preludeGreen');
+
+      // Run once per session
+      const seen = sessionStorage.getItem('sb_prelude_seen');
+      if (seen) {
+        if (prelude) prelude.remove();
+        return;
+      }
+
+      if (!prelude) return;
+
+      // Activate overlay
+      prelude.classList.add('is-active');
+      prelude.setAttribute('aria-hidden', 'false');
+
+      // Wait for fonts (best effort) and a short hold to make it feel intentional.
+      const fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+
+      const holdMs = prefersReduced ? 350 : 1450; // reduced motion: quick fade
+      const exitMs = prefersReduced ? 0 : 260;
+
+      Promise.race([
+        fontsReady,
+        new Promise((r) => setTimeout(r, 450))
+      ]).then(() => {
+        // Optional single green “confirmation blink” near the end.
+        if (!prefersReduced && green) {
+          // Start blink close to exit
+          setTimeout(() => {
+            green.style.animation = 'greenBlink 520ms ease 1';
+          }, Math.max(0, holdMs - 360));
+        }
+
+        setTimeout(() => {
+          prelude.classList.add('is-exiting');
+
+          setTimeout(() => {
+            prelude.remove();
+            sessionStorage.setItem('sb_prelude_seen', '1');
+          }, exitMs + 360);
+        }, holdMs);
+      });
+    })();
+  </script>
+</body>
+</html>
