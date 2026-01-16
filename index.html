@@ -1014,7 +1014,7 @@
         if (!hasMedia) {
           return `
             <article class="card ${size} text" aria-label="Field note">
-              <a class="card-link" href="${escapeHtml(url)}" target="_blank" rel="noopener" aria-label="Open in Notion">
+              <a class="card-link" href="#" data-notion-url="${escapeHtml(url)}" aria-label="Open in Notion">
                 <div class="label">${escapeHtml(type)}</div>
                 <div class="card-content">
                   <div class="quote">${escapeHtml(excerpt || title)}</div>
@@ -1036,7 +1036,7 @@
 
         return `
           <article class="card ${size} media" aria-label="Field note media">
-            <a class="card-link" href="${escapeHtml(url)}" target="_blank" rel="noopener" aria-label="Open in Notion">
+            <a class="card-link" href="#" data-notion-url="${escapeHtml(url)}" aria-label="Open in Notion">
               ${mediaEl}
               <div class="scrim" aria-hidden="true"></div>
               <div class="card-content" style="position:absolute; inset:auto 0 0 0; padding:14px; padding-bottom:34px;">
@@ -1201,7 +1201,83 @@
 
       // Load Field Notes automatically (no hash required).
       loadFieldNotes();
+
+      // ----------------------------
+      // Field Notes modal handling
+      // ----------------------------
+      const modal = document.getElementById('fnModal');
+      const modalContent = document.getElementById('fnModalContent');
+      const modalClose = document.getElementById('fnClose');
+      const modalOriginal = document.getElementById('fnOriginal');
+
+      document.addEventListener('click', (e) => {
+        const link = e.target.closest('.card-link');
+        if (!link) return;
+
+        e.preventDefault();
+
+        const notionUrl = link.getAttribute('data-notion-url');
+        if (!notionUrl) return;
+
+        modalContent.innerHTML = link.closest('.card').innerHTML;
+        modalOriginal.href = notionUrl.replace('https://notion.so', 'https://lilac-stocking-b2d.notion.site');
+
+        modal.style.display = 'block';
+      });
+
+      modalClose.addEventListener('click', () => {
+        modal.style.display = 'none';
+        modalContent.innerHTML = '';
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+          modalContent.innerHTML = '';
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          modal.style.display = 'none';
+          modalContent.innerHTML = '';
+        }
+      });
     })();
   </script>
 </body>
+  <!-- Field Notes Modal -->
+  <div id="fnModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.65); backdrop-filter:blur(12px);">
+    <div id="fnModalCard" style="
+      max-width:820px;
+      margin:6vh auto;
+      background:var(--bg);
+      border-radius:24px;
+      border:1px solid var(--stroke);
+      padding:22px;
+      position:relative;
+      box-shadow:0 40px 120px rgba(0,0,0,0.6);
+      font-family:var(--field-font);
+    ">
+      <button id="fnClose" style="
+        position:absolute;
+        top:14px;
+        right:16px;
+        background:none;
+        border:none;
+        color:var(--muted);
+        font-size:13px;
+        letter-spacing:.12em;
+        cursor:pointer;
+      ">CLOSE</button>
+
+      <div id="fnModalContent"></div>
+
+      <div style="margin-top:18px; font-size:12px; color:var(--muted); letter-spacing:.08em;">
+        <a id="fnOriginal" href="#" target="_blank" rel="noopener" style="color:inherit; text-decoration:none;">
+          OPEN ORIGINAL ↗
+        </a>
+      </div>
+    </div>
+  </div>
 </html>
