@@ -46,9 +46,9 @@
       --max: 980px;
 
       /* Indicator dot dimensions (Rams/Braun: subtle, diagnostic) */
-      --dot-w: 6px;
-      --dot-h: 6px;
-      --dot-gap: 8px;
+      --dot-w: 4px;
+      --dot-h: 4px;
+      --dot-gap: 7px;
 
       /* Speaker grille mark */
       --mark: 54px;
@@ -101,9 +101,9 @@
         radial-gradient(700px 500px at 20% 80%, rgba(255,255,255,0.05), transparent 60%),
         var(--bg);
       transform: translateZ(0);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 260ms ease;
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 420ms ease;
     }
 
     #prelude.is-active {
@@ -112,16 +112,16 @@
     }
 
     #prelude .prelude-card {
-      width: min(720px, 100%);
+      width: min(860px, 100%);
       border-radius: var(--r-xl);
       border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
+      background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
       box-shadow:
-        0 26px 70px rgba(0,0,0,0.40),
-        inset 0 1px 0 rgba(255,255,255,0.10);
-      padding: 28px;
+        0 34px 90px rgba(0,0,0,0.46),
+        inset 0 1px 0 rgba(255,255,255,0.11);
+      padding: clamp(22px, 3vw, 34px);
       display: grid;
-      gap: 18px;
+      gap: 16px;
       align-items: center;
       justify-items: center;
       text-align: center;
@@ -129,44 +129,45 @@
     }
 
     #prelude .mark {
-      width: min(220px, 52vw);
+      width: min(320px, 62vw);
       aspect-ratio: 1 / 1;
       border-radius: 999px;
       position: relative;
       display: grid;
       place-items: center;
-      background: rgba(255,255,255,0.02);
+      background: rgba(255,255,255,0.018);
       border: 1px solid var(--stroke);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.08),
-        0 18px 52px rgba(0,0,0,0.30);
+        inset 0 -18px 40px rgba(0,0,0,0.18),
+        0 22px 64px rgba(0,0,0,0.34);
       overflow: hidden;
 
       /* out-of-focus intro */
-      filter: blur(10px);
+      filter: blur(18px);
       opacity: 0;
-      transform: translateY(6px) scale(0.99);
+      transform: translateY(10px) scale(0.985);
       transition: filter 700ms ease, opacity 700ms ease, transform 700ms ease;
     }
 
     #prelude .mark picture,
     #prelude .mark img {
-      width: 78%;
-      height: 78%;
+      width: 84%;
+      height: 84%;
       display: block;
       object-fit: contain;
     }
 
 
     #prelude .wordmark {
-      width: min(760px, 92vw);
+      width: min(980px, 92vw);
       display: grid;
       place-items: center;
 
       /* out-of-focus intro */
-      filter: blur(10px);
+      filter: blur(18px);
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(10px);
       transition: filter 700ms ease, opacity 700ms ease, transform 700ms ease;
     }
 
@@ -188,16 +189,18 @@
       display: inline-flex;
       align-items: center;
       gap: var(--dot-gap);
-      padding: 10px 14px;
+      padding: 8px 12px;
       border-radius: 999px;
       border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.03);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.022);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.07),
+        inset 0 -10px 20px rgba(0,0,0,0.10);
 
       /* out-of-focus intro */
       opacity: 0;
-      filter: blur(6px);
-      transform: translateY(6px);
+      filter: blur(10px);
+      transform: translateY(8px);
       transition: filter 700ms ease, opacity 700ms ease, transform 700ms ease;
     }
 
@@ -210,30 +213,33 @@
     }
 
     /* OFF colors (red must feel muted/"dead", not alert) */
-    .dot.red { background: var(--red-off); opacity: 0.18; }
+    .dot.red { background: var(--red-off); opacity: 0.12; }
     .dot.amber { background: var(--amber-on); opacity: 0.16; }
     .dot.green { background: var(--green-on); opacity: 0.14; }
 
     /* 2s boot choreography */
     @keyframes bootAmber {
-      0%, 15% { opacity: 0.16; filter: none; }
-      20%, 30% { opacity: 0.95; filter: brightness(1.15) saturate(1.10); }
-      35%, 55% { opacity: 0.16; filter: none; }
-      58%, 66% { opacity: 0.85; filter: brightness(1.12) saturate(1.08); }
-      70%, 100% { opacity: 0.16; filter: none; }
+      0%, 18% { opacity: 0.16; filter: none; box-shadow: none; }
+      22%, 34% { opacity: 1.0; filter: brightness(1.18) saturate(1.12);
+        box-shadow: 0 0 10px var(--glow-amber), 0 0 18px rgba(224,138,26,0.18);
+      }
+      38%, 100% { opacity: 0.16; filter: none; box-shadow: none; }
     }
 
     @keyframes bootGreen {
-      0%, 45% { opacity: 0.14; filter: none; }
-      52%, 62% { opacity: 0.80; filter: brightness(1.15) saturate(1.10); }
-      68%, 78% { opacity: 1.00; filter: brightness(1.18) saturate(1.12); }
-      82%, 100% { opacity: 0.14; filter: none; }
+      0%, 44% { opacity: 0.14; filter: none; box-shadow: none; }
+      48%, 72% { opacity: 0.92; filter: brightness(1.18) saturate(1.12);
+        box-shadow: 0 0 10px var(--glow-green), 0 0 18px rgba(58,166,106,0.16);
+      }
+      76%, 100% { opacity: 0.14; filter: none; box-shadow: none; }
     }
 
     @keyframes bootAllFlash {
-      0%, 74% { }
-      78%, 86% { opacity: 1.00; filter: brightness(1.14) saturate(1.08); }
-      90%, 100% { opacity: 0.20; filter: none; }
+      0%, 68% { opacity: inherit; filter: none; box-shadow: none; }
+      74%, 84% { opacity: 1.0; filter: brightness(1.12) saturate(1.08);
+        box-shadow: 0 0 12px rgba(255,255,255,0.10);
+      }
+      88%, 100% { opacity: inherit; filter: none; box-shadow: none; }
     }
 
     #prelude.is-active .dot.red {
@@ -251,7 +257,7 @@
 
     #prelude.is-exiting {
       opacity: 0;
-      transition: opacity 320ms ease;
+      transition: opacity 520ms ease;
     }
 
     #prelude.is-exiting .prelude-card {
@@ -280,7 +286,7 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      padding: 14px 14px 0;
+      padding: 18px 18px 0;
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
     }
@@ -293,7 +299,7 @@
       gap: 10px;
       align-items: center;
       border-radius: 999px;
-      padding: 10px 12px;
+      padding: 14px 16px;
       border: 1px solid var(--stroke);
       background: rgba(255,255,255,0.04);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
@@ -302,13 +308,13 @@
     .brand {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       min-width: 0;
     }
 
     .brand .mini-mark {
-      width: 22px;
-      height: 22px;
+      width: 30px;
+      height: 30px;
       border-radius: 999px;
       border: 1px solid var(--stroke);
       background: rgba(255,255,255,0.03);
@@ -328,7 +334,7 @@
 
     .brand .name {
       display: block;
-      width: min(220px, 42vw);
+      width: min(320px, 52vw);
       opacity: 0.86;
     }
 
@@ -343,7 +349,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 10px;
+      padding: 10px 12px;
       border-radius: 999px;
       border: 1px solid var(--stroke);
       background: rgba(255,255,255,0.03);
@@ -352,7 +358,7 @@
       user-select: none;
     }
 
-    .legend-trigger .dot { width: 4px; height: 4px; opacity: 0.28; }
+    .legend-trigger .dot { width: 3px; height: 3px; opacity: 0.26; }
 
     /* Hover popup (desktop) */
     .legend {
@@ -490,7 +496,7 @@
 
     /* Mobile tweaks */
     @media (max-width: 520px) {
-      header { padding: 12px 12px 0; }
+      header { padding: 16px 12px 0; }
       main { padding: 14px 12px 56px; }
       .legend { display: none; } /* mobile: we can implement tap-to-open later */
     }
@@ -503,8 +509,8 @@
     <div class="prelude-card" role="presentation">
       <div class="mark" aria-hidden="true">
         <picture aria-hidden="true">
-          <source media="(prefers-color-scheme: dark)" srcset="assets/scott-visual-white.png" />
-          <img src="assets/scott-visual-black.png" alt="" />
+          <source media="(prefers-color-scheme: dark)" srcset="./assets/scott-visual-white.png" />
+          <img src="./assets/scott-visual-black.png" alt="" />
         </picture>
       </div>
 
@@ -516,8 +522,8 @@
 
       <div class="wordmark" aria-label="Scott Bertrand wordmark">
         <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="assets/scott-wordmark-white.png" />
-          <img src="assets/scott-wordmark-black.png" alt="SCOTT BERTRAND" />
+          <source media="(prefers-color-scheme: dark)" srcset="./assets/scott-wordmark-white.png" />
+          <img src="./assets/scott-wordmark-black.png" alt="SCOTT BERTRAND" />
         </picture>
       </div>
 
@@ -531,14 +537,14 @@
         <div class="brand" aria-label="Scott Bertrand">
           <div class="mini-mark" aria-hidden="true">
             <picture aria-hidden="true">
-              <source media="(prefers-color-scheme: dark)" srcset="assets/scott-visual-white.png" />
-              <img src="assets/scott-visual-black.png" alt="" />
+              <source media="(prefers-color-scheme: dark)" srcset="./assets/scott-visual-white.png" />
+              <img src="./assets/scott-visual-black.png" alt="" />
             </picture>
           </div>
           <div class="name">
             <picture>
-              <source media="(prefers-color-scheme: dark)" srcset="assets/scott-wordmark-white.png" />
-              <img src="assets/scott-wordmark-black.png" alt="Scott Bertrand" />
+              <source media="(prefers-color-scheme: dark)" srcset="./assets/scott-wordmark-white.png" />
+              <img src="./assets/scott-wordmark-black.png" alt="Scott Bertrand" />
             </picture>
           </div>
         </div>
@@ -596,11 +602,21 @@
 
   <script>
     (function () {
-      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const prelude = document.getElementById('prelude');
       if (!prelude) return;
 
-      // Runs on page initiation (full load).
+      // Run the boot sequence once per browser tab/session.
+      try {
+        const alreadyBooted = sessionStorage.getItem('sb_booted') === '1';
+        if (alreadyBooted) {
+          prelude.remove();
+          return;
+        }
+        sessionStorage.setItem('sb_booted', '1');
+      } catch (e) {
+        // If storage is blocked, just run normally.
+      }
+
       prelude.classList.add('is-active');
       prelude.setAttribute('aria-hidden', 'false');
 
@@ -610,7 +626,7 @@
 
       // Reveal from out-of-focus.
       requestAnimationFrame(() => {
-        [mark, wordmark, indicators].forEach((el) => {
+        [mark, indicators, wordmark].forEach((el) => {
           if (!el) return;
           el.style.opacity = '1';
           el.style.filter = 'blur(0px)';
@@ -618,13 +634,13 @@
         });
       });
 
-      // Total boot time: 2s (shorter for reduced motion)
-      const totalMs = prefersReduced ? 450 : 2000;
-      const exitMs = prefersReduced ? 0 : 260;
+      // Total boot time: 2s
+      const totalMs = 2000;
+      const exitMs = 520;
 
       setTimeout(() => {
         prelude.classList.add('is-exiting');
-        setTimeout(() => prelude.remove(), exitMs + 360);
+        setTimeout(() => prelude.remove(), exitMs + 200);
       }, totalMs);
     })();
   </script>
