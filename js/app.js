@@ -125,8 +125,10 @@
 
     brand.addEventListener("click", (e) => {
       e.preventDefault();
-      window.location.href = "./";
-      setTimeout(() => window.location.reload(), 0);
+      // Remove hash to show hero
+      window.location.hash = "";
+      // Scroll to top
+      window.scrollTo(0, 0);
     });
   };
 
@@ -466,7 +468,13 @@
       <div class="fn-modal-body">${escapeHtml(excerpt || "")}</div>
     `;
 
-    original.href = notionUrl || "#";
+    // Only show link if there's a valid Notion URL
+    if (notionUrl && notionUrl !== "#") {
+      original.href = notionUrl;
+      original.style.display = "inline-flex";
+    } else {
+      original.style.display = "none";
+    }
 
     modal.setAttribute("aria-hidden", "false");
     modal.classList.add("is-open");
@@ -506,7 +514,13 @@
       <div class="fn-modal-body">${escapeHtml(excerpt || "")}</div>
     `;
 
-    original.href = notionUrl || "#";
+    // Only show link if there's a valid Notion URL
+    if (notionUrl && notionUrl !== "#") {
+      original.href = notionUrl;
+      original.style.display = "inline-flex";
+    } else {
+      original.style.display = "none";
+    }
 
     sheet.setAttribute("aria-hidden", "false");
     sheet.classList.add("is-open");
