@@ -1,11 +1,7 @@
 /* ==========================================================================
-   Scott Lander v1.2.0 — app.js
-   Enhanced with:
-   - Scroll-triggered animations
-   - Subtle parallax effects (desktop)
-   - 3D card tilt on hover
-   - Bottom sheet modal (mobile)
-   - Performance optimizations
+   Scott Bertrand — Lander v1.3.0
+   Enhanced indicator system with true operational states
+   Following brand guidelines: offline → active → ready
    ========================================================================== */
 
 (() => {
@@ -20,7 +16,54 @@
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ============================
-     Theme + asset swapping
+     System State Management
+     Single source of truth
+     ============================ */
+
+  let systemState = 'offline'; // 'offline' | 'active' | 'ready'
+
+  const setState = (newState) => {
+    systemState = newState;
+    root.setAttribute('data-system-state', newState);
+    
+    // Update all indicator groups
+    $$('.indicator-group').forEach(updateIndicators);
+  };
+
+  const updateIndicators = (group) => {
+    const red = $('.dot.red', group);
+    const amber = $('.dot.amber', group);
+    const green = $('.dot.green', group);
+
+    if (!red || !amber || !green) return;
+
+    // Remove all state classes
+    [red, amber, green].forEach(dot => {
+      dot.classList.remove('state-off', 'state-dim', 'state-active', 'state-ready');
+    });
+
+    // Apply state classes
+    switch(systemState) {
+      case 'offline':
+        red.classList.add('state-off');
+        amber.classList.add('state-off');
+        green.classList.add('state-off');
+        break;
+      case 'active':
+        red.classList.add('state-dim');
+        amber.classList.add('state-active');
+        green.classList.add('state-dim');
+        break;
+      case 'ready':
+        red.classList.add('state-dim');
+        amber.classList.add('state-dim');
+        green.classList.add('state-ready');
+        break;
+    }
+  };
+
+  /* ============================
+     Theme Management
      ============================ */
 
   const THEME_KEY = "sb_theme";
@@ -101,7 +144,100 @@
   };
 
   /* ============================
-     Route handling
+     Prelude / Boot Sequence
+     Exact timing: 3200ms total
+     Phase 1: 0-260ms (Presence)
+     Phase 2: 260-2060ms (Active)
+     Phase 3: 2060-2580ms (Ready)
+     Phase 4: 2360-2880ms (Reveal, overlaps with Ready)
+     Phase 5: 2880-3200ms (Exit)
+     ============================ */
+
+  const initPrelude = () => {
+    const prelude = $("#prelude");
+    if (!prelude) return;
+
+    // Run once per session
+    try {
+      if (sessionStorage.getItem("sb_booted") === "1") {
+        prelude.remove();
+        setState('ready');
+        return;
+      }
+      sessionStorage.setItem("sb_booted", "1");
+    } catch {}
+
+    const setPhase = (phase) => prelude.setAttribute("data-phase", phase);
+
+    // Phase timing (ms)
+    const T = {
+      presenceStart: 0,
+      presenceEnd: 260,
+      activeStart: 260,
+      activeEnd: 2060,
+      readyStart: 2060,
+      readyEnd: 2580,
+      revealStart: 2360,
+      revealEnd: 2880,
+      exitStart: 2880,
+      exitEnd: 3200,
+      hardCap: 5200
+    };
+
+    prelude.setAttribute("aria-hidden", "false");
+
+    let finished = false;
+
+    const runSequence = () => {
+      if (finished) return;
+      finished = true;
+
+      // Phase 1: Presence (0-260ms)
+      setPhase('presence');
+      setState('offline');
+
+      setTimeout(() => {
+        // Phase 2: Active (260-2060ms)
+        setPhase('active');
+        setState('active');
+
+        setTimeout(() => {
+          // Phase 3: Ready (2060-2580ms)
+          setPhase('ready');
+          setState('ready');
+
+          setTimeout(() => {
+            // Phase 4: Reveal (2360-2880ms, overlaps with ready)
+            setPhase('reveal');
+
+            setTimeout(() => {
+              // Phase 5: Exit (2880-3200ms)
+              setPhase('exit');
+
+              setTimeout(() => {
+                prelude.remove();
+              }, T.exitEnd - T.exitStart + 50);
+
+            }, T.exitStart - T.revealStart);
+          }, T.revealStart - T.readyStart);
+        }, T.readyStart - T.activeStart);
+      }, T.activeStart - T.presenceStart);
+    };
+
+    // Ensure minimum dwell on prelude
+    const minGate = T.activeEnd;
+
+    setTimeout(() => {
+      if (document.readyState === "complete") runSequence();
+      else window.addEventListener("load", runSequence, { once: true });
+    }, 0);
+
+    // Failsafe
+    setTimeout(runSequence, T.hardCap);
+  };
+
+  /* ============================
+     Route Handling
      ============================ */
 
   const applyRoute = () => {
@@ -116,7 +252,7 @@
   };
 
   /* ============================
-     Brand click = refresh
+     Brand Logo - Return to Hero
      ============================ */
 
   const initBrandRefresh = () => {
@@ -125,79 +261,79 @@
 
     brand.addEventListener("click", (e) => {
       e.preventDefault();
-      // Remove hash to show hero
       window.location.hash = "";
-      // Scroll to top
       window.scrollTo(0, 0);
     });
   };
 
   /* ============================
-     Prelude / Boot Sequence
-     Optimized for 2-3 seconds
+     Field Notes Logo - Refresh
      ============================ */
 
-  const initPrelude = () => {
-    const prelude = $("#prelude");
-    if (!prelude) return;
+  const initFieldNotesRefresh = () => {
+    const refreshBtn = $("#fieldNotesRefresh");
+    if (!refreshBtn) return;
 
-    try {
-      if (sessionStorage.getItem("sb_booted") === "1") {
-        prelude.remove();
-        return;
+    refreshBtn.addEventListener("click", () => {
+      const fieldNotes = $("#field-notes");
+      if (fieldNotes) {
+        fieldNotes.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-      sessionStorage.setItem("sb_booted", "1");
+      
+      loadFieldNotes();
+    });
+  };
+
+  /* ============================
+     View Toggle (Grid/List)
+     ============================ */
+
+  const VIEW_KEY = "sb_view";
+
+  const initViewToggle = () => {
+    const toggle = $("#viewToggle");
+    const feed = $("#fieldNotesFeed");
+    if (!toggle || !feed) return;
+
+    const iconGrid = $(".icon-grid", toggle);
+    const iconList = $(".icon-list", toggle);
+    const label = $(".chip-label", toggle);
+
+    let currentView = "grid";
+    try {
+      currentView = localStorage.getItem(VIEW_KEY) || "grid";
     } catch {}
 
-    const setState = (state) => prelude.setAttribute("data-state", state);
+    const applyView = (view) => {
+      currentView = view;
+      
+      if (view === "list") {
+        feed.classList.add("list-view");
+        if (iconGrid) iconGrid.style.display = "none";
+        if (iconList) iconList.style.display = "block";
+        if (label) label.textContent = "List";
+      } else {
+        feed.classList.remove("list-view");
+        if (iconGrid) iconGrid.style.display = "block";
+        if (iconList) iconList.style.display = "none";
+        if (label) label.textContent = "Grid";
+      }
 
-    // Optimized timing for 2-3 second feel
-    const T = {
-      intro: 150,
-      loadingMin: 1200,
-      ready: 400,
-      allflash: 300,
-      reveal: 400,
-      exit: 450
+      try {
+        localStorage.setItem(VIEW_KEY, view);
+      } catch {}
     };
 
-    prelude.setAttribute("aria-hidden", "false");
-    setState("intro");
+    applyView(currentView);
 
-    setTimeout(() => setState("loading"), T.intro);
-
-    let finished = false;
-
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-
-      setState("ready");
-      setTimeout(() => {
-        setState("allflash");
-        setTimeout(() => {
-          setState("reveal");
-          setTimeout(() => {
-            setState("exit");
-            setTimeout(() => prelude.remove(), T.exit + 50);
-          }, T.reveal);
-        }, T.allflash);
-      }, T.ready);
-    };
-
-    const minGate = T.intro + T.loadingMin;
-
-    setTimeout(() => {
-      if (document.readyState === "complete") finish();
-      else window.addEventListener("load", finish, { once: true });
-    }, minGate);
-
-    setTimeout(finish, 3200); // Hard cap
+    toggle.addEventListener("click", () => {
+      const nextView = currentView === "grid" ? "list" : "grid";
+      applyView(nextView);
+    });
   };
 
   /* ============================
      Scroll Animations
-     Fade in elements as they enter viewport
      ============================ */
 
   const initScrollAnimations = () => {
@@ -218,7 +354,6 @@
 
     $$('.scroll-fade').forEach(el => observer.observe(el));
 
-    // Stagger cards animation
     const cards = $$('.card');
     if (cards.length) {
       cards.forEach((card, i) => {
@@ -228,8 +363,7 @@
   };
 
   /* ============================
-     Parallax Effect (Desktop only)
-     Subtle background movement
+     Parallax (Desktop Only)
      ============================ */
 
   const initParallax = () => {
@@ -263,8 +397,7 @@
   };
 
   /* ============================
-     3D Card Tilt Effect (Desktop)
-     Subtle perspective shift on hover
+     3D Card Tilt (Desktop Only)
      ============================ */
 
   const init3DCardTilt = () => {
@@ -281,7 +414,7 @@
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
-        const rotateX = ((y - centerY) / centerY) * -5; // Max 5deg
+        const rotateX = ((y - centerY) / centerY) * -5;
         const rotateY = ((x - centerX) / centerX) * 5;
 
         card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
@@ -294,7 +427,7 @@
   };
 
   /* ============================
-     Field Notes — Notion API
+     Field Notes - Notion API
      ============================ */
 
   const FIELDNOTES_TABLE_ID = "2ea3c4a766e480b7a46ed6bb8d6cde82";
@@ -439,8 +572,6 @@
 
   /* ============================
      Modal Systems
-     Desktop: Center modal
-     Mobile: Bottom sheet
      ============================ */
 
   const openModal = ({ title, type, date, excerpt, notionUrl }) => {
@@ -468,7 +599,6 @@
       <div class="fn-modal-body">${escapeHtml(excerpt || "")}</div>
     `;
 
-    // Only show link if there's a valid Notion URL
     if (notionUrl && notionUrl !== "#") {
       original.href = notionUrl;
       original.style.display = "inline-flex";
@@ -514,7 +644,6 @@
       <div class="fn-modal-body">${escapeHtml(excerpt || "")}</div>
     `;
 
-    // Only show link if there's a valid Notion URL
     if (notionUrl && notionUrl !== "#") {
       original.href = notionUrl;
       original.style.display = "inline-flex";
@@ -546,6 +675,8 @@
     if (!feedEl || !emptyEl) return;
 
     try {
+      // Show loading state
+      setState('active');
       emptyEl.textContent = "Loading Field Notes…";
 
       const res = await fetch(API(FIELDNOTES_TABLE_ID), { cache: "no-store" });
@@ -567,12 +698,12 @@
             No public notes yet. Toggle <b>Public</b> on in Notion to publish.
           </div>
         `;
+        setState('ready');
         return;
       }
 
       feedEl.innerHTML = posts.map(renderCard).join("");
 
-      // Bind modal opens
       $$(".card-link", feedEl).forEach((btn) => {
         btn.addEventListener("click", () => {
           const title = btn.getAttribute("data-title") || "";
@@ -584,10 +715,10 @@
         });
       });
 
-      // Re-observe new cards for scroll animations
+      // Ready state after load
+      setState('ready');
+
       initScrollAnimations();
-      
-      // Apply 3D tilt to new cards
       setTimeout(init3DCardTilt, 100);
 
     } catch (err) {
@@ -597,6 +728,7 @@
           Could not load Field Notes right now.
         </div>
       `;
+      setState('ready');
     }
   }
 
@@ -608,14 +740,13 @@
     initTheme();
     initRouting();
     initBrandRefresh();
+    initFieldNotesRefresh();
+    initViewToggle();
     initPrelude();
     initScrollAnimations();
     initParallax();
     
-    loadFieldNotes().then(() => {
-      // After cards load, add 3D tilt effect
-      setTimeout(init3DCardTilt, 200);
-    });
+    loadFieldNotes();
   };
 
   if (document.readyState === "loading") {
