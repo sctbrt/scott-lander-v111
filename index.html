@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
   <title>Scott Bertrand</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='6' fill='%23ffffff'/%3E%3C/svg%3E">
 
   <!--
     Typeface note:
@@ -50,23 +51,19 @@
       --dot-h: 4px;
       --dot-gap: 7px;
 
-      /* Speaker grille mark */
-      --mark: 54px;
-      --dot: 4px;
-      --dot-gap: 7px;
     }
 
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg: #f3f1ea;
-        --panel: rgba(0,0,0,0.05);
-        --panel-2: rgba(0,0,0,0.07);
-        --stroke: rgba(0,0,0,0.12);
-        --stroke-2: rgba(0,0,0,0.18);
-        --text: rgba(0,0,0,0.90);
-        --muted: rgba(0,0,0,0.66);
-        --quiet: rgba(0,0,0,0.40);
-      }
+
+    /* Manual theme override (JS sets data-theme on <html>) */
+    :root[data-theme="light"] {
+      --bg: #f3f1ea;
+      --panel: rgba(0,0,0,0.05);
+      --panel-2: rgba(0,0,0,0.07);
+      --stroke: rgba(0,0,0,0.12);
+      --stroke-2: rgba(0,0,0,0.18);
+      --text: rgba(0,0,0,0.90);
+      --muted: rgba(0,0,0,0.66);
+      --quiet: rgba(0,0,0,0.40);
     }
 
     * { box-sizing: border-box; }
@@ -106,10 +103,6 @@
       transition: opacity 420ms ease;
     }
 
-    #prelude.is-active {
-      opacity: 1;
-      pointer-events: auto;
-    }
 
     #prelude .prelude-card {
       width: min(860px, 100%);
@@ -150,7 +143,6 @@
       transition: filter 700ms ease, opacity 700ms ease, transform 700ms ease;
     }
 
-    #prelude .mark picture,
     #prelude .mark img {
       width: 84%;
       height: 84%;
@@ -171,7 +163,6 @@
       transition: filter 700ms ease, opacity 700ms ease, transform 700ms ease;
     }
 
-    #prelude .wordmark picture,
     #prelude .wordmark img {
       width: 100%;
       height: auto;
@@ -255,6 +246,15 @@
       animation: bootGreen 2000ms ease 1, bootAllFlash 2000ms ease 1;
     }
 
+    /* Reveal from out-of-focus (toggled via class instead of JS inline styles) */
+    #prelude.is-revealed .mark,
+    #prelude.is-revealed .wordmark,
+    #prelude.is-revealed .indicators {
+      opacity: 1;
+      filter: blur(0px);
+      transform: translateY(0) scale(1);
+    }
+
     #prelude.is-exiting {
       opacity: 0;
       transition: opacity 520ms ease;
@@ -295,7 +295,7 @@
       max-width: var(--max);
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr auto auto;
       gap: 10px;
       align-items: center;
       border-radius: 999px;
@@ -324,7 +324,6 @@
       place-items: center;
     }
 
-    .brand .mini-mark picture,
     .brand .mini-mark img {
       width: 86%;
       height: 86%;
@@ -338,7 +337,6 @@
       opacity: 0.86;
     }
 
-    .brand .name picture,
     .brand .name img {
       width: 100%;
       height: auto;
@@ -360,6 +358,36 @@
 
     .legend-trigger .dot { width: 3px; height: 3px; opacity: 0.26; }
 
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .theme-toggle:hover { background: rgba(255,255,255,0.06); }
+
+    .theme-toggle .chip {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.08);
+    }
+
+    :root[data-theme="light"] .theme-toggle .chip { background: rgba(0,0,0,0.12); }
+
     /* Hover popup (desktop) */
     .legend {
       position: absolute;
@@ -368,7 +396,7 @@
       width: min(320px, 80vw);
       border-radius: var(--r-lg);
       border: 1px solid var(--stroke);
-      background: rgba(18,18,18,0.68);
+      background: rgba(255,255,255,0.08);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       box-shadow: 0 18px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10);
@@ -377,11 +405,7 @@
       transform: translateY(-6px);
       pointer-events: none;
       transition: opacity 160ms ease, transform 160ms ease;
-      color: rgba(255,255,255,0.92);
-    }
-
-    @media (prefers-color-scheme: light) {
-      .legend { background: rgba(255,255,255,0.72); color: rgba(0,0,0,0.90); }
+      color: var(--text);
     }
 
     .legend-trigger:hover .legend {
@@ -405,11 +429,7 @@
       gap: 10px;
       align-items: center;
       padding: 8px 6px;
-      border-top: 1px solid rgba(255,255,255,0.10);
-    }
-
-    @media (prefers-color-scheme: light) {
-      .legend .row { border-top: 1px solid rgba(0,0,0,0.10); }
+      border-top: 1px solid var(--stroke);
     }
 
     .legend .row:first-of-type { border-top: 0; }
@@ -507,11 +527,13 @@
   <!-- Prelude Overlay (runs on page initiation). Assets expected in /assets: scott-visual-black.png, scott-visual-white.png, scott-wordmark-black.png, scott-wordmark-white.png -->
   <div id="prelude" aria-hidden="true">
     <div class="prelude-card" role="presentation">
-      <div class="mark" aria-hidden="true">
-        <picture aria-hidden="true">
-          <source media="(prefers-color-scheme: dark)" srcset="./assets/scott-visual-white.png" />
-          <img src="./assets/scott-visual-black.png" alt="" />
-        </picture>
+      <div class="mark">
+        <img
+          src="./assets/scott-visual-black.png"
+          data-src-dark="./assets/scott-visual-white.png"
+          data-src-light="./assets/scott-visual-black.png"
+          alt=""
+        />
       </div>
 
       <div class="indicators" aria-hidden="true" aria-label="Boot sequence">
@@ -521,10 +543,12 @@
       </div>
 
       <div class="wordmark" aria-label="Scott Bertrand wordmark">
-        <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="./assets/scott-wordmark-white.png" />
-          <img src="./assets/scott-wordmark-black.png" alt="SCOTT BERTRAND" />
-        </picture>
+        <img
+          src="./assets/scott-wordmark-black.png"
+          data-src-dark="./assets/scott-wordmark-white.png"
+          data-src-light="./assets/scott-wordmark-black.png"
+          alt="SCOTT BERTRAND"
+        />
       </div>
 
       <div class="hook">Systems • Ops • Brand clarity</div>
@@ -536,18 +560,27 @@
       <div class="topbar">
         <div class="brand" aria-label="Scott Bertrand">
           <div class="mini-mark" aria-hidden="true">
-            <picture aria-hidden="true">
-              <source media="(prefers-color-scheme: dark)" srcset="./assets/scott-visual-white.png" />
-              <img src="./assets/scott-visual-black.png" alt="" />
-            </picture>
+            <img
+              src="./assets/scott-visual-black.png"
+              data-src-dark="./assets/scott-visual-white.png"
+              data-src-light="./assets/scott-visual-black.png"
+              alt=""
+            />
           </div>
           <div class="name">
-            <picture>
-              <source media="(prefers-color-scheme: dark)" srcset="./assets/scott-wordmark-white.png" />
-              <img src="./assets/scott-wordmark-black.png" alt="Scott Bertrand" />
-            </picture>
+            <img
+              src="./assets/scott-wordmark-black.png"
+              data-src-dark="./assets/scott-wordmark-white.png"
+              data-src-light="./assets/scott-wordmark-black.png"
+              alt="Scott Bertrand"
+            />
           </div>
         </div>
+
+        <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+          <span class="chip" aria-hidden="true"></span>
+          <span class="label">Theme</span>
+        </button>
 
         <div class="legend-trigger" aria-label="Status legend">
           <span class="dot red" aria-hidden="true"></span>
@@ -602,6 +635,61 @@
 
   <script>
     (function () {
+      // ----------------------------
+      // Theme (light/dark) + asset swapping
+      // ----------------------------
+      const root = document.documentElement;
+      const THEME_KEY = 'sb_theme';
+
+      const prefersDark = () =>
+        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      const readTheme = () => {
+        try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; }
+      };
+
+      const writeTheme = (value) => {
+        try { localStorage.setItem(THEME_KEY, value); } catch (e) {}
+      };
+
+      function swapThemeAssets(theme) {
+        const imgs = document.querySelectorAll('img[data-src-dark][data-src-light]');
+        imgs.forEach((img) => {
+          const next = theme === 'dark'
+            ? img.getAttribute('data-src-dark')
+            : img.getAttribute('data-src-light');
+          if (next) img.src = next;
+        });
+      }
+
+      function applyTheme(theme) {
+        root.setAttribute('data-theme', theme);
+        swapThemeAssets(theme);
+      }
+
+      // Initial theme: stored override, otherwise system preference
+      const stored = readTheme();
+      applyTheme(stored || (prefersDark() ? 'dark' : 'light'));
+
+      // If no stored override, keep in sync with OS changes
+      if (!stored && window.matchMedia) {
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        const onChange = () => applyTheme(prefersDark() ? 'dark' : 'light');
+        if (mq.addEventListener) mq.addEventListener('change', onChange);
+        else if (mq.addListener) mq.addListener(onChange);
+      }
+
+      // Manual toggle: locks an explicit theme
+      const themeBtn = document.querySelector('.theme-toggle');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          const current = root.getAttribute('data-theme') || (prefersDark() ? 'dark' : 'light');
+          const next = current === 'dark' ? 'light' : 'dark';
+          writeTheme(next);
+          applyTheme(next);
+        });
+      }
+
       const prelude = document.getElementById('prelude');
       if (!prelude) return;
 
@@ -620,19 +708,8 @@
       prelude.classList.add('is-active');
       prelude.setAttribute('aria-hidden', 'false');
 
-      const mark = prelude.querySelector('.mark');
-      const wordmark = prelude.querySelector('.wordmark');
-      const indicators = prelude.querySelector('.indicators');
-
-      // Reveal from out-of-focus.
-      requestAnimationFrame(() => {
-        [mark, indicators, wordmark].forEach((el) => {
-          if (!el) return;
-          el.style.opacity = '1';
-          el.style.filter = 'blur(0px)';
-          el.style.transform = 'translateY(0) scale(1)';
-        });
-      });
+      // Reveal from out-of-focus (CSS handles the actual transitions)
+      requestAnimationFrame(() => prelude.classList.add('is-revealed'));
 
       // Total boot time: 2s
       const totalMs = 2000;
