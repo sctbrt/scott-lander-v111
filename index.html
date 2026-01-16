@@ -640,6 +640,76 @@
       letter-spacing: 0.04em;
     }
 
+    /* Field Notes feed: interactive cards */
+    .card-link {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      height: 100%;
+    }
+
+    .card:hover {
+      border-color: var(--stroke-2);
+      background: rgba(255,255,255,0.045);
+    }
+
+    .card .meta-bar {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-family: var(--field-font);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .card .meta-bar .date {
+      white-space: nowrap;
+      opacity: 0.85;
+    }
+
+    .card .meta-bar .type {
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      opacity: 0.85;
+    }
+
+    .card.media .label { display: none; }
+
+    .card.media .scrim {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(520px 320px at 18% 18%, rgba(255,255,255,0.10), transparent 62%),
+        linear-gradient(180deg, rgba(0,0,0,0.00), rgba(0,0,0,0.55));
+      pointer-events: none;
+      opacity: 0.85;
+    }
+
+    :root[data-theme="light"] .card.media .scrim {
+      background:
+        radial-gradient(520px 320px at 18% 18%, rgba(255,255,255,0.22), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,0.00), rgba(0,0,0,0.22));
+      opacity: 0.9;
+    }
+
+    .empty-feed {
+      border-radius: var(--r-lg);
+      border: 1px dashed var(--stroke);
+      padding: 18px;
+      font-family: var(--field-font);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
     @media (max-width: 860px) {
       .card.s { grid-column: span 6; }
       .card.m { grid-column: span 12; }
@@ -852,31 +922,10 @@
             <div class="fieldnotes-meta">Newest first • Modular grid</div>
           </div>
 
-          <!-- Feed placeholder: we will wire this to Notion (Option A) next. -->
-          <div class="feed" aria-label="Field Notes feed">
-            <article class="card l text" aria-label="Sample text post">
-              <div class="label">Text</div>
-              <div class="card-content">
-                <div class="quote">System online. Quiet progress beats loud motion.</div>
-                <div class="source">Field note • Draft</div>
-              </div>
-            </article>
-
-            <article class="card m" aria-label="Sample media post">
-              <div class="label">Media</div>
-              <div class="card-content" style="padding-top:46px;">
-                <div class="quote">Media placeholder (image/video) — will render when Notion wiring is live.</div>
-                <div class="source">Field note • Draft</div>
-              </div>
-            </article>
-
-            <article class="card s text" aria-label="Sample quote post">
-              <div class="label">Quote</div>
-              <div class="card-content">
-                <div class="quote">Clarity is a feature.</div>
-                <div class="source">Note • Draft</div>
-              </div>
-            </article>
+          <div class="feed" aria-label="Field Notes feed" id="fieldnotesFeed">
+            <div class="empty-feed" id="fieldnotesEmpty">
+              Loading Field Notes…
+            </div>
           </div>
         </div>
       </section>
@@ -890,6 +939,166 @@
       // ----------------------------
       const root = document.documentElement;
       const THEME_KEY = 'sb_theme';
+
+      // ----------------------------
+      // Field Notes (Option A): Notion public database -> rendered feed
+      // Uses a lightweight public endpoint (no auth) for speed/ease.
+      // REQUIREMENT: the Notion database page must be Published to web.
+      // ----------------------------
+
+      // TODO: replace with your real Notion page id (from the public URL)
+      // Example URL: https://xxxxx.notion.site/<PAGE_ID>
+      const FIELDNOTES_PAGE_ID = '2ea3c4a766e480b7a46ed6bb8d6cde82'; // Field notes database/page id from your Notion URL
+
+      // Public read endpoint (no token). If this ever changes, we can swap providers.
+      const FIELDNOTES_API = (pageId) => `https://notion-api.splitbee.io/v1/table/${pageId}`;
+
+      const feedEl = document.getElementById('fieldnotesFeed');
+      const emptyEl = document.getElementById('fieldnotesEmpty');
+
+      const fmtDate = (v) => {
+        if (!v) return '';
+        try {
+          const d = new Date(v);
+          if (Number.isNaN(d.getTime())) return String(v);
+          return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+        } catch (_) {
+          return String(v);
+        }
+      };
+
+      const pickSize = (i, hasMedia) => {
+        // Gentle modular rhythm: prioritize larger cards for media.
+        const cycle = hasMedia ? ['l','m','m','s','m'] : ['m','s','m','s','m'];
+        return cycle[i % cycle.length];
+      };
+
+      const mediaUrlFromRow = (row) => {
+        // splitbee responses often represent files as strings or arrays; handle both.
+        const m = row?.Media;
+        if (!m) return '';
+        if (typeof m === 'string') return m;
+        if (Array.isArray(m) && m.length) {
+          const first = m[0];
+          if (typeof first === 'string') return first;
+          if (first?.url) return first.url;
+        }
+        if (m?.url) return m.url;
+        return '';
+      };
+
+      const isVideo = (url) => {
+        if (!url) return false;
+        const u = url.toLowerCase();
+        return u.endsWith('.mp4') || u.endsWith('.mov') || u.includes('video');
+      };
+
+      const escapeHtml = (s) => String(s ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+
+      const renderCard = (post, i) => {
+        const title = post.Title || '';
+        const type = (post.Type || 'Note');
+        const excerpt = post.Excerpt || '';
+        const published = post.Published || post.Date || '';
+        const url = post.__url || '#';
+        const media = mediaUrlFromRow(post);
+        const hasMedia = Boolean(media);
+        const size = pickSize(i, hasMedia);
+
+        // Text-style card content should visually “fill” like an image.
+        if (!hasMedia) {
+          return `
+            <article class="card ${size} text" aria-label="Field note">
+              <a class="card-link" href="${escapeHtml(url)}" target="_blank" rel="noopener" aria-label="Open in Notion">
+                <div class="label">${escapeHtml(type)}</div>
+                <div class="card-content">
+                  <div class="quote">${escapeHtml(excerpt || title)}</div>
+                  <div class="source">${escapeHtml(title ? title : 'Field note')}</div>
+                </div>
+                <div class="meta-bar" aria-hidden="true">
+                  <span class="type">${escapeHtml(type)}</span>
+                  <span class="date">${escapeHtml(fmtDate(published))}</span>
+                </div>
+              </a>
+            </article>
+          `;
+        }
+
+        // Media card
+        const mediaEl = isVideo(media)
+          ? `<video class="card-media" src="${escapeHtml(media)}" muted playsinline preload="metadata"></video>`
+          : `<img class="card-media" src="${escapeHtml(media)}" alt="" loading="lazy" />`;
+
+        return `
+          <article class="card ${size} media" aria-label="Field note media">
+            <a class="card-link" href="${escapeHtml(url)}" target="_blank" rel="noopener" aria-label="Open in Notion">
+              ${mediaEl}
+              <div class="scrim" aria-hidden="true"></div>
+              <div class="card-content" style="position:absolute; inset:auto 0 0 0; padding:14px; padding-bottom:34px;">
+                <div class="quote">${escapeHtml(excerpt || title || 'Field note')}</div>
+              </div>
+              <div class="meta-bar" aria-hidden="true">
+                <span class="type">${escapeHtml(type)}</span>
+                <span class="date">${escapeHtml(fmtDate(published))}</span>
+              </div>
+            </a>
+          </article>
+        `;
+      };
+
+      async function loadFieldNotes() {
+        if (!feedEl || !emptyEl) return;
+
+        // If the page id looks unset/placeholder, show instructions.
+        if (!FIELDNOTES_PAGE_ID || FIELDNOTES_PAGE_ID.length < 24) {
+          emptyEl.textContent = 'Set your Notion page id in the code (FIELDNOTES_PAGE_ID), then refresh.';
+          return;
+        }
+
+        try {
+          emptyEl.textContent = 'Loading Field Notes…';
+          const res = await fetch(FIELDNOTES_API(FIELDNOTES_PAGE_ID), { cache: 'no-store' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const rows = await res.json();
+
+          // Normalize, filter to Public=true, sort newest first.
+          const posts = (Array.isArray(rows) ? rows : []).filter((r) => {
+            // Notion checkbox might come through as true/false or "Yes".
+            const v = r?.Public;
+            return v === true || v === 'true' || v === 'Yes' || v === 'yes' || v === 1;
+          });
+
+          posts.sort((a, b) => {
+            const da = new Date(a?.Published || a?.Date || 0).getTime() || 0;
+            const db = new Date(b?.Published || b?.Date || 0).getTime() || 0;
+            return db - da;
+          });
+
+          // Provide a Notion URL if splitbee rows include ids.
+          // If you want a custom domain path later, we’ll swap this.
+          posts.forEach((p) => {
+            if (!p.__url) {
+              const pid = p?.id || p?.Id || '';
+              if (pid) p.__url = `https://notion.so/${pid.replaceAll('-', '')}`;
+            }
+          });
+
+          if (!posts.length) {
+            emptyEl.textContent = 'No public Field Notes yet. In Notion, set Public ✅ on a post to publish it here.';
+            return;
+          }
+
+          emptyEl.remove();
+          feedEl.insertAdjacentHTML('beforeend', posts.map(renderCard).join(''));
+        } catch (err) {
+          emptyEl.textContent = 'Could not load Field Notes. Confirm the database is published to web, and the page id is correct.';
+        }
+      }
 
       const prefersDark = () =>
         window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -969,6 +1178,9 @@
         prelude.classList.add('is-exiting');
         setTimeout(() => prelude.remove(), exitMs + 200);
       }, totalMs);
+
+      // Load Field Notes automatically (no hash required).
+      loadFieldNotes();
     })();
   </script>
 </body>
