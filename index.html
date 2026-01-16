@@ -4,44 +4,29 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
-  <meta name="description" content="Systems that make the day run clean. Operations and brand systems." />
+  <meta name="description" content="Systems that make the day run clean." />
   <title>Scott Bertrand</title>
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-    rel="stylesheet"
-  >
-
-  <!-- Favicon -->
-  <link
-    rel="icon"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='6' fill='%23000'/%3E%3C/svg%3E"
-  >
-
-  <!-- Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='6' fill='%23000'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
-
 <body>
 
-  <!-- =========================
-       Prelude / Boot Sequence
-       ========================= -->
-  <div id="prelude" aria-hidden="true">
-    <div class="prelude-card">
-
-      <!-- Indicators (operational truth) -->
-      <div class="prelude-indicators indicator-group" aria-hidden="true">
-        <span class="dot red state-off"></span>
-        <span class="dot amber state-off"></span>
-        <span class="dot green state-off"></span>
+  <!-- PRELUDE / BOOT SEQUENCE -->
+  <div id="prelude" aria-hidden="false">
+    <div class="prelude-inner">
+      
+      <!-- Indicators (vertical pills) -->
+      <div class="indicator-pills" aria-hidden="true">
+        <span class="pill red"></span>
+        <span class="pill amber"></span>
+        <span class="pill green"></span>
       </div>
 
-      <!-- Visual Mark -->
-      <div class="prelude-mark">
+      <!-- Speaker Grille Mark -->
+      <div class="speaker-grille">
         <img
           src="./assets/scott-visual-black.png"
           data-src-light="./assets/scott-visual-black.png"
@@ -51,7 +36,7 @@
       </div>
 
       <!-- Wordmark -->
-      <div class="prelude-wordmark">
+      <div class="brand-wordmark">
         <img
           src="./assets/scott-wordmark-black.png"
           data-src-light="./assets/scott-wordmark-black.png"
@@ -63,195 +48,115 @@
     </div>
   </div>
 
-  <!-- =========================
-       App Shell
-       ========================= -->
-  <div class="shell">
+  <!-- MAIN SITE (SYSTEM INTERFACE) -->
+  <div class="site-shell" id="mainSite">
+    
+    <!-- Centered Brand Header -->
+    <header class="brand-header">
+      
+      <!-- Indicators (vertical pills) -->
+      <div class="indicator-pills" aria-hidden="true">
+        <span class="pill red"></span>
+        <span class="pill amber"></span>
+        <span class="pill green"></span>
+      </div>
 
-    <!-- Header -->
-    <header class="site-header">
-      <div class="topbar">
+      <!-- Speaker Grille (clickable - reloads) -->
+      <button class="speaker-grille" aria-label="Reload" id="brandRefresh">
+        <img
+          src="./assets/scott-visual-black.png"
+          data-src-light="./assets/scott-visual-black.png"
+          data-src-dark="./assets/scott-visual-white.png"
+          alt=""
+        />
+      </button>
 
-        <!-- Brand (refreshes page) -->
-        <a class="brand" href="./" aria-label="Return to homepage">
-          <span class="brand-mark">
-            <img
-              src="./assets/scott-visual-black.png"
-              data-src-light="./assets/scott-visual-black.png"
-              data-src-dark="./assets/scott-visual-white.png"
-              alt=""
-            />
-          </span>
-          <span class="brand-wordmark">
-            <img
-              src="./assets/scott-wordmark-black.png"
-              data-src-light="./assets/scott-wordmark-black.png"
-              data-src-dark="./assets/scott-wordmark-white.png"
-              alt="Scott Bertrand"
-            />
-          </span>
-        </a>
+      <!-- Wordmark -->
+      <div class="brand-wordmark">
+        <img
+          src="./assets/scott-wordmark-black.png"
+          data-src-light="./assets/scott-wordmark-black.png"
+          data-src-dark="./assets/scott-wordmark-white.png"
+          alt="Scott Bertrand"
+        />
+      </div>
 
-        <!-- Theme Toggle -->
-        <button
-          class="chip-btn"
-          id="themeToggle"
-          type="button"
-          aria-label="Toggle theme"
-        >
-          <span class="chip-label">Theme</span>
+      <!-- Simple Nav -->
+      <nav class="simple-nav">
+        <button class="nav-btn" id="themeToggle" aria-label="Toggle theme">Theme</button>
+        <a class="nav-btn" href="#field-notes">Field Notes</a>
+      </nav>
+
+    </header>
+
+    <!-- Main Content (Optional - can be minimal) -->
+    <main class="main-content">
+      <div class="statement">
+        <p>I work across operations and brand systems to reduce friction where performance slips quietly — at the counter, in handoffs, and in the routines teams rely on.</p>
+        <a href="mailto:hello@scottbertrand.com" class="contact-btn">Contact</a>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- FIELD NOTES (SKY MICROBRAND) -->
+  <div class="field-notes-shell" id="fieldNotes" hidden>
+    
+    <header class="fn-header">
+      <button class="fn-mark-btn" id="fnRefresh" aria-label="Refresh Field Notes">
+        <img src="./assets/marks/field-notes.png" alt="Field Notes" class="fn-mark" />
+      </button>
+      
+      <div class="fn-controls">
+        <button class="fn-btn" id="viewToggle" aria-label="Toggle view">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-grid">
+            <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-list" style="display:none;">
+            <line x1="2" y1="3" x2="14" y2="3" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="2" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span class="fn-label">Grid</span>
         </button>
-
-        <!-- Field Notes Nav -->
-        <a
-          class="chip-btn"
-          href="#field-notes"
-          aria-label="View Field Notes"
-        >
-          <span class="chip-label">Field Notes</span>
-        </a>
-
-        <!-- Status Indicator (operational truth) -->
-        <div class="status-indicator indicator-group" aria-hidden="true">
-          <span class="dot red state-off"></span>
-          <span class="dot amber state-off"></span>
-          <span class="dot green state-off"></span>
-        </div>
-
+        <button class="fn-btn" id="fnClose" aria-label="Return to main">Close</button>
       </div>
     </header>
 
-    <!-- =========================
-         Main Content
-         ========================= -->
-    <main>
+    <div class="fn-feed" id="fnFeed">
+      <div class="fn-empty" id="fnEmpty">Loading…</div>
+    </div>
 
-      <!-- Hero (hidden on Field Notes route) -->
-      <section class="hero scroll-fade" aria-label="Introduction">
-        <div class="hero-bg-layer" data-parallax="0.3"></div>
-        <div class="hero-content">
-          <h1 class="hero-title">Systems that make the day run clean.</h1>
-          <p class="hero-sub">
-            I work across operations and brand systems to reduce friction where
-            performance slips quietly — at the counter, in handoffs, and in the
-            routines teams rely on.
-          </p>
-
-          <div class="hero-actions">
-            <a href="mailto:hello@scottbertrand.com" class="btn">
-              Contact
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <!-- =========================
-           Field Notes (Primary Page)
-           ========================= -->
-      <section
-        class="field-notes scroll-fade"
-        id="field-notes"
-        aria-label="Field Notes"
-      >
-
-        <header class="field-notes-header">
-          <button 
-            class="field-notes-mark-btn"
-            type="button"
-            aria-label="Refresh Field Notes"
-            id="fieldNotesRefresh"
-          >
-            <img
-              src="./assets/marks/field-notes.png"
-              alt="Field Notes"
-              class="field-notes-mark"
-            />
-          </button>
-          <button 
-            class="view-toggle chip-btn" 
-            id="viewToggle"
-            type="button"
-            aria-label="Toggle view"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-grid">
-              <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-              <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-              <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-              <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-list" style="display:none;">
-              <line x1="2" y1="3" x2="14" y2="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="2" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            <span class="chip-label">Grid</span>
-          </button>
-        </header>
-
-        <div
-          class="field-notes-feed"
-          id="fieldNotesFeed"
-        >
-          <!-- JS injects cards -->
-          <div class="field-notes-empty" id="fieldNotesEmpty">
-            Loading Field Notes…
-          </div>
-        </div>
-
-      </section>
-
-    </main>
   </div>
 
-  <!-- =========================
-       Field Notes Modal (Desktop)
-       ========================= -->
-  <div id="fieldNotesModal" class="modal-overlay" aria-hidden="true">
+  <!-- MODAL (Desktop) -->
+  <div id="modal" class="modal-overlay" aria-hidden="true">
     <div class="modal-backdrop"></div>
     <div class="modal-card">
-      <button class="modal-close" type="button" aria-label="Close">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <div class="modal-content" id="fieldNotesModalContent"></div>
+      <button class="modal-close" aria-label="Close">×</button>
+      <div class="modal-body" id="modalBody"></div>
       <div class="modal-actions">
-        <a
-          id="fieldNotesOriginal"
-          href="#"
-          target="_blank"
-          rel="noopener"
-        >
-          Open original →
-        </a>
+        <a id="modalLink" href="#" target="_blank" rel="noopener">Open original →</a>
       </div>
     </div>
   </div>
 
-  <!-- =========================
-       Field Notes Bottom Sheet (Mobile)
-       ========================= -->
-  <div id="fieldNotesSheet" class="bottom-sheet" aria-hidden="true">
+  <!-- BOTTOM SHEET (Mobile) -->
+  <div id="sheet" class="bottom-sheet" aria-hidden="true">
     <div class="sheet-backdrop"></div>
-    <div class="sheet-content">
+    <div class="sheet-card">
       <div class="sheet-handle"></div>
-      <button class="sheet-close" type="button" aria-label="Close">Close</button>
-      <div class="sheet-body" id="fieldNotesSheetContent"></div>
+      <button class="sheet-close" aria-label="Close">Close</button>
+      <div class="sheet-body" id="sheetBody"></div>
       <div class="sheet-actions">
-        <a
-          id="fieldNotesSheetOriginal"
-          href="#"
-          target="_blank"
-          rel="noopener"
-          class="btn"
-        >
-          Open original →
-        </a>
+        <a id="sheetLink" href="#" target="_blank" rel="noopener" class="sheet-btn">Open original →</a>
       </div>
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="./js/app.js"></script>
 </body>
 </html>

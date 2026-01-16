@@ -1,163 +1,103 @@
-/* ==========================================================================
-   Scott Bertrand — Lander v1.3.0
-   Enhanced indicator system with true operational states
-   Following brand guidelines: offline → active → ready
-   ========================================================================== */
-
 (() => {
   "use strict";
 
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const root = document.documentElement;
   const isMobile = () => window.innerWidth < 768;
-  const prefersReducedMotion = () => 
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ============================
-     System State Management
-     Single source of truth
-     ============================ */
+  let systemState = 'offline';
 
-  let systemState = 'offline'; // 'offline' | 'active' | 'ready'
-
-  const setState = (newState) => {
-    systemState = newState;
-    root.setAttribute('data-system-state', newState);
-    
-    // Update all indicator groups
-    $$('.indicator-group').forEach(updateIndicators);
+  const setState = (state) => {
+    systemState = state;
+    root.setAttribute('data-state', state);
+    updateAllIndicators();
   };
 
-  const updateIndicators = (group) => {
-    const red = $('.dot.red', group);
-    const amber = $('.dot.amber', group);
-    const green = $('.dot.green', group);
+  const updateAllIndicators = () => {
+    $$('.indicator-pills').forEach(group => {
+      const red = $('.pill.red', group);
+      const amber = $('.pill.amber', group);
+      const green = $('.pill.green', group);
+      if (!red || !amber || !green) return;
 
-    if (!red || !amber || !green) return;
+      [red, amber, green].forEach(p => p.className = p.className.replace(/ state-\w+/g, ''));
 
-    // Remove all state classes
-    [red, amber, green].forEach(dot => {
-      dot.classList.remove('state-off', 'state-dim', 'state-active', 'state-ready');
-    });
-
-    // Apply state classes
-    switch(systemState) {
-      case 'offline':
+      if (systemState === 'offline') {
         red.classList.add('state-off');
         amber.classList.add('state-off');
         green.classList.add('state-off');
-        break;
-      case 'active':
+      } else if (systemState === 'active') {
         red.classList.add('state-dim');
         amber.classList.add('state-active');
         green.classList.add('state-dim');
-        break;
-      case 'ready':
+      } else if (systemState === 'ready') {
         red.classList.add('state-dim');
         amber.classList.add('state-dim');
         green.classList.add('state-ready');
-        break;
-    }
+      }
+    });
   };
 
-  /* ============================
-     Theme Management
-     ============================ */
-
+  /* THEME */
   const THEME_KEY = "sb_theme";
 
-  const prefersDark = () =>
-    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const getStoredTheme = () => {
+    try { return localStorage.getItem(THEME_KEY); } catch { return null; }
+  };
 
-  const readTheme = () => {
+  const saveTheme = (t) => {
+    try { localStorage.setItem(THEME_KEY, t); } catch {}
+  };
+
+  const getTimeBasedTheme = () => {
     try {
-      return localStorage.getItem(THEME_KEY);
+      const h = new Date().getHours();
+      return (h >= 9 && h < 18) ? "light" : "dark";
     } catch {
-      return null;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
     }
   };
 
-  const writeTheme = (v) => {
-    try {
-      localStorage.setItem(THEME_KEY, v);
-    } catch {}
-  };
-
-  const themeByLocalTime = () => {
-    try {
-      const hour = new Date().getHours();
-      const isDay = hour >= 9 && hour < 18;
-      return isDay ? "light" : "dark";
-    } catch {
-      return prefersDark() ? "dark" : "light";
-    }
-  };
-
-  const swapThemeAssets = (theme) => {
-    $$("img[data-src-light][data-src-dark]").forEach((img) => {
-      const next =
-        theme === "dark"
-          ? img.getAttribute("data-src-dark")
-          : img.getAttribute("data-src-light");
-      if (next) img.src = next;
+  const swapAssets = (theme) => {
+    $$("img[data-src-light][data-src-dark]").forEach(img => {
+      img.src = theme === "dark" ? img.getAttribute("data-src-dark") : img.getAttribute("data-src-light");
     });
-
-    const fnMark = $(".field-notes-mark");
+    const fnMark = $(".fn-mark");
     if (fnMark) {
-      fnMark.src =
-        theme === "dark"
-          ? "./assets/marks/field-notes-white.png"
-          : "./assets/marks/field-notes.png";
+      fnMark.src = theme === "dark" ? "./assets/marks/field-notes-white.png" : "./assets/marks/field-notes.png";
     }
   };
 
   const applyTheme = (theme) => {
     root.setAttribute("data-theme", theme);
-    root.classList.add('theme-transitioning');
-    swapThemeAssets(theme);
-    setTimeout(() => root.classList.remove('theme-transitioning'), 400);
+    swapAssets(theme);
   };
 
   const initTheme = () => {
-    const stored = readTheme();
-    const initial = stored || themeByLocalTime();
+    const stored = getStoredTheme();
+    const initial = stored || getTimeBasedTheme();
     applyTheme(initial);
-
-    if (!stored && window.matchMedia) {
-      const mq = window.matchMedia("(prefers-color-scheme: dark)");
-      const onChange = () => applyTheme(themeByLocalTime());
-      if (mq.addEventListener) mq.addEventListener("change", onChange);
-      else if (mq.addListener) mq.addListener(onChange);
-    }
 
     const toggle = $("#themeToggle");
     if (toggle) {
       toggle.addEventListener("click", () => {
-        const current = root.getAttribute("data-theme") || themeByLocalTime();
+        const current = root.getAttribute("data-theme");
         const next = current === "dark" ? "light" : "dark";
-        writeTheme(next);
+        saveTheme(next);
         applyTheme(next);
       });
     }
   };
 
-  /* ============================
-     Prelude / Boot Sequence
-     Exact timing: 3200ms total
-     Phase 1: 0-260ms (Presence)
-     Phase 2: 260-2060ms (Active)
-     Phase 3: 2060-2580ms (Ready)
-     Phase 4: 2360-2880ms (Reveal, overlaps with Ready)
-     Phase 5: 2880-3200ms (Exit)
-     ============================ */
-
+  /* PRELUDE - ENFORCED 3.2s */
   const initPrelude = () => {
     const prelude = $("#prelude");
-    if (!prelude) return;
+    if (!prelude) {
+      setState('ready');
+      return;
+    }
 
-    // Run once per session
     try {
       if (sessionStorage.getItem("sb_booted") === "1") {
         prelude.remove();
@@ -167,30 +107,14 @@
       sessionStorage.setItem("sb_booted", "1");
     } catch {}
 
-    const setPhase = (phase) => prelude.setAttribute("data-phase", phase);
+    const setPhase = (p) => prelude.setAttribute("data-phase", p);
 
-    // Phase timing (ms)
-    const T = {
-      presenceStart: 0,
-      presenceEnd: 260,
-      activeStart: 260,
-      activeEnd: 2060,
-      readyStart: 2060,
-      readyEnd: 2580,
-      revealStart: 2360,
-      revealEnd: 2880,
-      exitStart: 2880,
-      exitEnd: 3200,
-      hardCap: 5200
-    };
-
-    prelude.setAttribute("aria-hidden", "false");
-
-    let finished = false;
+    let started = false;
+    const startTime = Date.now();
 
     const runSequence = () => {
-      if (finished) return;
-      finished = true;
+      if (started) return;
+      started = true;
 
       // Phase 1: Presence (0-260ms)
       setPhase('presence');
@@ -207,7 +131,7 @@
           setState('ready');
 
           setTimeout(() => {
-            // Phase 4: Reveal (2360-2880ms, overlaps with ready)
+            // Phase 4: Reveal (2360-2880ms) - overlaps
             setPhase('reveal');
 
             setTimeout(() => {
@@ -216,34 +140,59 @@
 
               setTimeout(() => {
                 prelude.remove();
-              }, T.exitEnd - T.exitStart + 50);
+              }, 320);
 
-            }, T.exitStart - T.revealStart);
-          }, T.revealStart - T.readyStart);
-        }, T.readyStart - T.activeStart);
-      }, T.activeStart - T.presenceStart);
+            }, 520);
+          }, 300);
+        }, 1800);
+      }, 260);
     };
 
-    // Ensure minimum dwell on prelude
-    const minGate = T.activeEnd;
+    // ENFORCE 3.2s minimum - wait until both load complete AND 2060ms elapsed
+    const minWait = 2060;
+    let loadComplete = false;
 
-    setTimeout(() => {
-      if (document.readyState === "complete") runSequence();
-      else window.addEventListener("load", runSequence, { once: true });
-    }, 0);
+    const checkStart = () => {
+      const elapsed = Date.now() - startTime;
+      if (loadComplete && elapsed >= minWait) {
+        runSequence();
+      } else {
+        const remaining = Math.max(0, minWait - elapsed);
+        setTimeout(checkStart, remaining);
+      }
+    };
+
+    if (document.readyState === "complete") {
+      loadComplete = true;
+      checkStart();
+    } else {
+      window.addEventListener("load", () => {
+        loadComplete = true;
+        checkStart();
+      }, { once: true });
+    }
 
     // Failsafe
-    setTimeout(runSequence, T.hardCap);
+    setTimeout(runSequence, 5200);
   };
 
-  /* ============================
-     Route Handling
-     ============================ */
-
+  /* ROUTING */
   const applyRoute = () => {
-    const hash = (window.location.hash || "").toLowerCase();
-    const isFieldNotes = hash === "#field-notes";
-    document.body.classList.toggle("route-fieldnotes", isFieldNotes);
+    const hash = window.location.hash.toLowerCase();
+    const showFN = hash === "#field-notes";
+    
+    const main = $("#mainSite");
+    const fn = $("#fieldNotes");
+    
+    if (showFN) {
+      if (main) main.hidden = true;
+      if (fn) fn.hidden = false;
+      document.body.classList.add('route-fn');
+    } else {
+      if (main) main.hidden = false;
+      if (fn) fn.hidden = true;
+      document.body.classList.remove('route-fn');
+    }
   };
 
   const initRouting = () => {
@@ -251,63 +200,51 @@
     applyRoute();
   };
 
-  /* ============================
-     Brand Logo - Return to Hero
-     ============================ */
-
+  /* BRAND REFRESH */
   const initBrandRefresh = () => {
-    const brand = $(".brand");
-    if (!brand) return;
-
-    brand.addEventListener("click", (e) => {
-      e.preventDefault();
-      window.location.hash = "";
-      window.scrollTo(0, 0);
-    });
+    const btn = $("#brandRefresh");
+    if (btn) {
+      btn.addEventListener("click", () => {
+        window.location.hash = "";
+        window.scrollTo(0, 0);
+      });
+    }
   };
 
-  /* ============================
-     Field Notes Logo - Refresh
-     ============================ */
+  /* FN REFRESH */
+  const initFNRefresh = () => {
+    const btn = $("#fnRefresh");
+    if (btn) {
+      btn.addEventListener("click", () => {
+        loadFieldNotes();
+      });
+    }
 
-  const initFieldNotesRefresh = () => {
-    const refreshBtn = $("#fieldNotesRefresh");
-    if (!refreshBtn) return;
-
-    refreshBtn.addEventListener("click", () => {
-      const fieldNotes = $("#field-notes");
-      if (fieldNotes) {
-        fieldNotes.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-      
-      loadFieldNotes();
-    });
+    const close = $("#fnClose");
+    if (close) {
+      close.addEventListener("click", () => {
+        window.location.hash = "";
+      });
+    }
   };
 
-  /* ============================
-     View Toggle (Grid/List)
-     ============================ */
-
+  /* VIEW TOGGLE */
   const VIEW_KEY = "sb_view";
-
   const initViewToggle = () => {
     const toggle = $("#viewToggle");
-    const feed = $("#fieldNotesFeed");
+    const feed = $("#fnFeed");
     if (!toggle || !feed) return;
 
     const iconGrid = $(".icon-grid", toggle);
     const iconList = $(".icon-list", toggle);
-    const label = $(".chip-label", toggle);
+    const label = $(".fn-label", toggle);
 
-    let currentView = "grid";
-    try {
-      currentView = localStorage.getItem(VIEW_KEY) || "grid";
-    } catch {}
+    let view = "grid";
+    try { view = localStorage.getItem(VIEW_KEY) || "grid"; } catch {}
 
-    const applyView = (view) => {
-      currentView = view;
-      
-      if (view === "list") {
+    const apply = (v) => {
+      view = v;
+      if (v === "list") {
         feed.classList.add("list-view");
         if (iconGrid) iconGrid.style.display = "none";
         if (iconList) iconList.style.display = "block";
@@ -318,139 +255,25 @@
         if (iconList) iconList.style.display = "none";
         if (label) label.textContent = "Grid";
       }
-
-      try {
-        localStorage.setItem(VIEW_KEY, view);
-      } catch {}
+      try { localStorage.setItem(VIEW_KEY, v); } catch {}
     };
 
-    applyView(currentView);
-
-    toggle.addEventListener("click", () => {
-      const nextView = currentView === "grid" ? "list" : "grid";
-      applyView(nextView);
-    });
+    apply(view);
+    toggle.addEventListener("click", () => apply(view === "grid" ? "list" : "grid"));
   };
 
-  /* ============================
-     Scroll Animations
-     ============================ */
+  /* FIELD NOTES LOADER */
+  const API_ID = "2ea3c4a766e480b7a46ed6bb8d6cde82";
+  const API_URL = `https://notion-api.splitbee.io/v1/table/${API_ID}`;
 
-  const initScrollAnimations = () => {
-    if (prefersReducedMotion()) return;
-
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: "0px 0px -50px 0px"
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-        }
-      });
-    }, observerOptions);
-
-    $$('.scroll-fade').forEach(el => observer.observe(el));
-
-    const cards = $$('.card');
-    if (cards.length) {
-      cards.forEach((card, i) => {
-        card.style.transitionDelay = `${i * 50}ms`;
-      });
-    }
-  };
-
-  /* ============================
-     Parallax (Desktop Only)
-     ============================ */
-
-  const initParallax = () => {
-    if (isMobile() || prefersReducedMotion()) return;
-
-    const parallaxElements = $$('[data-parallax]');
-    if (!parallaxElements.length) return;
-
-    let ticking = false;
-
-    const updateParallax = () => {
-      const scrolled = window.pageYOffset;
-
-      parallaxElements.forEach(el => {
-        const speed = parseFloat(el.getAttribute('data-parallax')) || 0.5;
-        const yPos = -(scrolled * speed);
-        el.style.transform = `translate3d(0, ${yPos}px, 0)`;
-      });
-
-      ticking = false;
-    };
-
-    const requestTick = () => {
-      if (!ticking) {
-        requestAnimationFrame(updateParallax);
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', requestTick, { passive: true });
-  };
-
-  /* ============================
-     3D Card Tilt (Desktop Only)
-     ============================ */
-
-  const init3DCardTilt = () => {
-    if (isMobile() || prefersReducedMotion()) return;
-
-    const cards = $$('.card');
-
-    cards.forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        const rotateX = ((y - centerY) / centerY) * -5;
-        const rotateY = ((x - centerX) / centerX) * 5;
-
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
-      });
-
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = '';
-      });
-    });
-  };
-
-  /* ============================
-     Field Notes - Notion API
-     ============================ */
-
-  const FIELDNOTES_TABLE_ID = "2ea3c4a766e480b7a46ed6bb8d6cde82";
-  const API = (id) => `https://notion-api.splitbee.io/v1/table/${id}`;
-
-  const escapeHtml = (s) =>
-    String(s ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+  const esc = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 
   const fmtDate = (v) => {
     if (!v) return "";
     try {
       const d = new Date(v);
-      if (Number.isNaN(d.getTime())) return String(v);
-      return d.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric"
-      });
+      if (isNaN(d)) return String(v);
+      return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
     } catch {
       return String(v);
     }
@@ -458,37 +281,23 @@
 
   const isPublic = (r) => {
     const v = r?.Public;
-    if (v === undefined || v === null || v === "") return false;
+    if (v == null || v === "") return false;
     if (typeof v === "boolean") return v;
     if (typeof v === "number") return v === 1;
     const s = String(v).trim().toLowerCase();
-    return (
-      s === "true" ||
-      s === "yes" ||
-      s === "y" ||
-      s === "1" ||
-      s === "checked" ||
-      s === "on" ||
-      s === "✅" ||
-      s === "✔" ||
-      s === "✔︎"
-    );
+    return s === "true" || s === "yes" || s === "1" || s === "checked" || s === "✅";
   };
 
-  const mediaUrlFromRow = (row) => {
-    const m = row?.Media;
+  const getMedia = (r) => {
+    const m = r?.Media;
     if (!m) return "";
-
     if (typeof m === "string") return m;
-
     if (Array.isArray(m) && m.length) {
-      const first = m[0];
-      if (typeof first === "string") return first;
-      if (first && typeof first === "object" && first.url) return first.url;
+      const f = m[0];
+      if (typeof f === "string") return f;
+      if (f?.url) return f.url;
     }
-
-    if (typeof m === "object" && m.url) return m.url;
-
+    if (m?.url) return m.url;
     return "";
   };
 
@@ -503,42 +312,36 @@
     return cycle[i % cycle.length];
   };
 
-  const getNotionUrl = (row) => {
-    return row?.__url || row?.URL || row?.Url || row?.Link || "";
-  };
+  const getUrl = (r) => r?.__url || r?.URL || r?.Url || r?.Link || "";
 
-  const renderCard = (row, index) => {
+  const renderCard = (row, idx) => {
     const title = row?.Title || row?.Name || "Field note";
     const type = row?.Type || "Note";
     const excerpt = row?.Excerpt || row?.Text || row?.Content || "";
-    const published = row?.Published || row?.Date || row?.Created || "";
-
-    const notionUrl = getNotionUrl(row);
-    const media = mediaUrlFromRow(row);
+    const date = row?.Published || row?.Date || row?.Created || "";
+    const url = getUrl(row);
+    const media = getMedia(row);
     const hasMedia = Boolean(media);
-    const size = pickSize(index, hasMedia);
+    const size = pickSize(idx, hasMedia);
 
     if (!hasMedia) {
       const quote = excerpt || title;
-
       return `
-        <article class="card ${size} text scroll-fade" role="listitem">
-          <button class="card-link"
-            type="button"
-            data-notion-url="${escapeHtml(notionUrl)}"
-            data-title="${escapeHtml(title)}"
-            data-type="${escapeHtml(type)}"
-            data-date="${escapeHtml(published)}"
-            data-excerpt="${escapeHtml(excerpt)}"
-            aria-label="Open field note">
-            <div class="label-tag">${escapeHtml(type)}</div>
-            <div class="card-content">
-              <div class="quote">${escapeHtml(quote)}</div>
-              <div class="source">${escapeHtml(title)}</div>
+        <article class="fn-card ${size} text">
+          <button class="fn-card-btn"
+            data-url="${esc(url)}"
+            data-title="${esc(title)}"
+            data-type="${esc(type)}"
+            data-date="${esc(date)}"
+            data-excerpt="${esc(excerpt)}">
+            <div class="fn-tag">${esc(type)}</div>
+            <div class="fn-content">
+              <div class="fn-quote">${esc(quote)}</div>
+              <div class="fn-source">${esc(title)}</div>
             </div>
-            <div class="meta-bar" aria-hidden="true">
-              <span class="type">${escapeHtml(type)}</span>
-              <span class="date">${escapeHtml(fmtDate(published))}</span>
+            <div class="fn-meta">
+              <span>${esc(type)}</span>
+              <span>${esc(fmtDate(date))}</span>
             </div>
           </button>
         </article>
@@ -546,145 +349,124 @@
     }
 
     const mediaEl = isVideo(media)
-      ? `<video class="card-media" src="${escapeHtml(media)}" muted playsinline preload="metadata" loading="lazy"></video>`
-      : `<img class="card-media" src="${escapeHtml(media)}" alt="" loading="lazy" />`;
+      ? `<video class="fn-media" src="${esc(media)}" muted playsinline preload="metadata"></video>`
+      : `<img class="fn-media" src="${esc(media)}" alt="" loading="lazy" />`;
 
     return `
-      <article class="card ${size} media scroll-fade" role="listitem">
-        <button class="card-link"
-          type="button"
-          data-notion-url="${escapeHtml(notionUrl)}"
-          data-title="${escapeHtml(title)}"
-          data-type="${escapeHtml(type)}"
-          data-date="${escapeHtml(published)}"
-          data-excerpt="${escapeHtml(excerpt)}"
-          aria-label="Open field note media">
+      <article class="fn-card ${size} media">
+        <button class="fn-card-btn"
+          data-url="${esc(url)}"
+          data-title="${esc(title)}"
+          data-type="${esc(type)}"
+          data-date="${esc(date)}"
+          data-excerpt="${esc(excerpt)}">
           ${mediaEl}
-          <div class="scrim" aria-hidden="true"></div>
-          <div class="meta-bar" aria-hidden="true">
-            <span class="type">${escapeHtml(type)}</span>
-            <span class="date">${escapeHtml(fmtDate(published))}</span>
+          <div class="fn-scrim"></div>
+          <div class="fn-meta">
+            <span>${esc(type)}</span>
+            <span>${esc(fmtDate(date))}</span>
           </div>
         </button>
       </article>
     `;
   };
 
-  /* ============================
-     Modal Systems
-     ============================ */
-
-  const openModal = ({ title, type, date, excerpt, notionUrl }) => {
-    const mobile = isMobile();
-
-    if (mobile) {
-      openBottomSheet({ title, type, date, excerpt, notionUrl });
+  const openModal = ({ title, type, date, excerpt, url }) => {
+    if (isMobile()) {
+      openSheet({ title, type, date, excerpt, url });
     } else {
-      openCenterModal({ title, type, date, excerpt, notionUrl });
+      openCenterModal({ title, type, date, excerpt, url });
     }
   };
 
-  const openCenterModal = ({ title, type, date, excerpt, notionUrl }) => {
-    const modal = $("#fieldNotesModal");
-    const content = $("#fieldNotesModalContent");
-    const closeBtn = $(".modal-close", modal);
-    const original = $("#fieldNotesOriginal");
+  const openCenterModal = ({ title, type, date, excerpt, url }) => {
+    const modal = $("#modal");
+    const body = $("#modalBody");
+    const link = $("#modalLink");
+    const close = $(".modal-close", modal);
 
-    if (!modal || !content || !closeBtn || !original) return;
+    if (!modal || !body || !link || !close) return;
 
-    content.innerHTML = `
-      <div class="fn-modal-kicker">${escapeHtml(type || "Field note")}</div>
-      <h3 class="fn-modal-title">${escapeHtml(title || "Field note")}</h3>
-      <div class="fn-modal-date">${escapeHtml(fmtDate(date))}</div>
-      <div class="fn-modal-body">${escapeHtml(excerpt || "")}</div>
+    body.innerHTML = `
+      <div class="modal-kicker">${esc(type || "Field note")}</div>
+      <h3 class="modal-title">${esc(title || "Field note")}</h3>
+      <div class="modal-date">${esc(fmtDate(date))}</div>
+      <div class="modal-excerpt">${esc(excerpt || "")}</div>
     `;
 
-    if (notionUrl && notionUrl !== "#") {
-      original.href = notionUrl;
-      original.style.display = "inline-flex";
+    if (url && url !== "#") {
+      link.href = url;
+      link.style.display = "inline-flex";
     } else {
-      original.style.display = "none";
+      link.style.display = "none";
     }
 
     modal.setAttribute("aria-hidden", "false");
     modal.classList.add("is-open");
     document.body.style.overflow = 'hidden';
 
-    const close = () => {
+    const closeModal = () => {
       modal.setAttribute("aria-hidden", "true");
       modal.classList.remove("is-open");
       document.body.style.overflow = '';
     };
 
-    const onBackdrop = (e) => {
-      if (e.target.classList.contains('modal-backdrop')) close();
-    };
-
-    const onKey = (e) => {
-      if (e.key === "Escape") close();
-    };
-
-    closeBtn.onclick = close;
-    modal.onclick = onBackdrop;
-    document.addEventListener("keydown", onKey, { once: true });
+    close.onclick = closeModal;
+    modal.onclick = (e) => { if (e.target.classList.contains('modal-backdrop')) closeModal(); };
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); }, { once: true });
   };
 
-  const openBottomSheet = ({ title, type, date, excerpt, notionUrl }) => {
-    const sheet = $("#fieldNotesSheet");
-    const content = $("#fieldNotesSheetContent");
-    const closeBtn = $(".sheet-close", sheet);
-    const original = $("#fieldNotesSheetOriginal");
+  const openSheet = ({ title, type, date, excerpt, url }) => {
+    const sheet = $("#sheet");
+    const body = $("#sheetBody");
+    const link = $("#sheetLink");
+    const close = $(".sheet-close", sheet);
 
-    if (!sheet || !content || !closeBtn || !original) return;
+    if (!sheet || !body || !link || !close) return;
 
-    content.innerHTML = `
-      <div class="fn-modal-kicker">${escapeHtml(type || "Field note")}</div>
-      <h3 class="fn-modal-title">${escapeHtml(title || "Field note")}</h3>
-      <div class="fn-modal-date">${escapeHtml(fmtDate(date))}</div>
-      <div class="fn-modal-body">${escapeHtml(excerpt || "")}</div>
+    body.innerHTML = `
+      <div class="modal-kicker">${esc(type || "Field note")}</div>
+      <h3 class="modal-title">${esc(title || "Field note")}</h3>
+      <div class="modal-date">${esc(fmtDate(date))}</div>
+      <div class="modal-excerpt">${esc(excerpt || "")}</div>
     `;
 
-    if (notionUrl && notionUrl !== "#") {
-      original.href = notionUrl;
-      original.style.display = "inline-flex";
+    if (url && url !== "#") {
+      link.href = url;
+      link.style.display = "inline-flex";
     } else {
-      original.style.display = "none";
+      link.style.display = "none";
     }
 
     sheet.setAttribute("aria-hidden", "false");
     sheet.classList.add("is-open");
     document.body.style.overflow = 'hidden';
 
-    const close = () => {
+    const closeSheet = () => {
       sheet.setAttribute("aria-hidden", "true");
       sheet.classList.remove("is-open");
       document.body.style.overflow = '';
     };
 
-    const onBackdrop = (e) => {
-      if (e.target.classList.contains('sheet-backdrop')) close();
-    };
-
-    closeBtn.onclick = close;
-    sheet.onclick = onBackdrop;
+    close.onclick = closeSheet;
+    sheet.onclick = (e) => { if (e.target.classList.contains('sheet-backdrop')) closeSheet(); };
   };
 
   async function loadFieldNotes() {
-    const feedEl = $("#fieldNotesFeed");
-    const emptyEl = $("#fieldNotesEmpty");
-    if (!feedEl || !emptyEl) return;
+    const feed = $("#fnFeed");
+    const empty = $("#fnEmpty");
+    if (!feed || !empty) return;
 
     try {
-      // Show loading state
       setState('active');
-      emptyEl.textContent = "Loading Field Notes…";
+      empty.textContent = "Loading…";
 
-      const res = await fetch(API(FIELDNOTES_TABLE_ID), { cache: "no-store" });
+      const res = await fetch(API_URL, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const rows = await res.json();
-      const allRows = Array.isArray(rows) ? rows : [];
-      const posts = allRows.filter(isPublic);
+      const all = Array.isArray(rows) ? rows : [];
+      const posts = all.filter(isPublic);
 
       posts.sort((a, b) => {
         const da = new Date(a?.Published || a?.Date || a?.Created || 0).getTime();
@@ -693,59 +475,42 @@
       });
 
       if (!posts.length) {
-        feedEl.innerHTML = `
-          <div class="field-notes-empty">
-            No public notes yet. Toggle <b>Public</b> on in Notion to publish.
-          </div>
-        `;
+        feed.innerHTML = `<div class="fn-empty">No public notes yet.</div>`;
         setState('ready');
         return;
       }
 
-      feedEl.innerHTML = posts.map(renderCard).join("");
+      feed.innerHTML = posts.map(renderCard).join("");
 
-      $$(".card-link", feedEl).forEach((btn) => {
+      $$(".fn-card-btn", feed).forEach(btn => {
         btn.addEventListener("click", () => {
-          const title = btn.getAttribute("data-title") || "";
-          const type = btn.getAttribute("data-type") || "";
-          const date = btn.getAttribute("data-date") || "";
-          const excerpt = btn.getAttribute("data-excerpt") || "";
-          const notionUrl = btn.getAttribute("data-notion-url") || "";
-          openModal({ title, type, date, excerpt, notionUrl });
+          openModal({
+            title: btn.getAttribute("data-title") || "",
+            type: btn.getAttribute("data-type") || "",
+            date: btn.getAttribute("data-date") || "",
+            excerpt: btn.getAttribute("data-excerpt") || "",
+            url: btn.getAttribute("data-url") || ""
+          });
         });
       });
 
-      // Ready state after load
       setState('ready');
-
-      initScrollAnimations();
-      setTimeout(init3DCardTilt, 100);
 
     } catch (err) {
       console.error(err);
-      feedEl.innerHTML = `
-        <div class="field-notes-empty">
-          Could not load Field Notes right now.
-        </div>
-      `;
+      feed.innerHTML = `<div class="fn-empty">Could not load Field Notes.</div>`;
       setState('ready');
     }
   }
 
-  /* ============================
-     Init
-     ============================ */
-
+  /* INIT */
   const init = () => {
     initTheme();
     initRouting();
     initBrandRefresh();
-    initFieldNotesRefresh();
+    initFNRefresh();
     initViewToggle();
     initPrelude();
-    initScrollAnimations();
-    initParallax();
-    
     loadFieldNotes();
   };
 
