@@ -5,1344 +5,198 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
   <title>Scott Bertrand</title>
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='6' fill='%23ffffff'/%3E%3C/svg%3E">
-
-  <!--
-    Typeface note:
-    Your wordmark spec is Alternate Gothic No1 D Regular, 94pt, tracking 100.
-    We cannot legally ship the font here; once you have a web-licensed copy,
-    add an @font-face below and point src: to your hosted .woff2.
-  -->
-
-  <style>
-    :root {
-      /* Rams/Braun-inspired neutrals */
-      --bg: #0f1113;
-      --panel: rgba(255,255,255,0.06);
-      --panel-2: rgba(255,255,255,0.08);
-      --stroke: rgba(255,255,255,0.14);
-      --stroke-2: rgba(255,255,255,0.22);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.68);
-      --quiet: rgba(255,255,255,0.42);
-
-      /* Indicator palette (tuned for “real” plastic/LED vibe) */
-      --red-off: #6b2a22;
-      --amber-on: #e08a1a;
-      --green-on: #3aa66a;
-
-      /* Subtle glows */
-      --glow-amber: rgba(224,138,26,0.42);
-      --glow-green: rgba(58,166,106,0.36);
-
-      /* Layout tokens */
-      --r-xl: 28px;
-      --r-lg: 20px;
-      --r-md: 14px;
-
-      --pad-1: 14px;
-      --pad-2: 18px;
-      --pad-3: 22px;
-
-      --max: 980px;
-
-      /* Indicator dot dimensions (Rams/Braun: subtle, diagnostic) */
-      --dot-w: 3px;
-      --dot-h: 3px;
-      --dot-gap: 8px;
-
-      --field-font: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
-
-
-    /* Manual theme override (JS sets data-theme on <html>) */
-    :root[data-theme="light"] {
-      --bg: #f3f1ea;
-      --panel: rgba(0,0,0,0.05);
-      --panel-2: rgba(0,0,0,0.07);
-      --stroke: rgba(0,0,0,0.12);
-      --stroke-2: rgba(0,0,0,0.18);
-      --text: rgba(0,0,0,0.90);
-      --muted: rgba(0,0,0,0.66);
-      --quiet: rgba(0,0,0,0.40);
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      color: var(--text);
-      background:
-        radial-gradient(1200px 700px at 15% 10%, rgba(255,255,255,0.08), transparent 55%),
-        radial-gradient(900px 600px at 90% 20%, rgba(255,255,255,0.06), transparent 60%),
-        radial-gradient(900px 700px at 40% 120%, rgba(255,255,255,0.05), transparent 55%),
-        var(--bg);
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial;
-      letter-spacing: 0.2px;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    /* ----------------------------
-       Prelude overlay
-    ----------------------------- */
-
-    #prelude {
-      position: fixed;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: 28px;
-      z-index: 9999;
-      background:
-        radial-gradient(1100px 700px at 50% 35%, rgba(255,255,255,0.08), transparent 62%),
-        radial-gradient(700px 500px at 20% 80%, rgba(255,255,255,0.05), transparent 60%),
-        var(--bg);
-      transform: translateZ(0);
-      opacity: 1;
-      pointer-events: auto;
-      transition: opacity 420ms ease;
-    }
-
-
-    #prelude .prelude-card {
-      width: min(820px, 100%);
-      border-radius: var(--r-xl);
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
-      box-shadow:
-        0 34px 90px rgba(0,0,0,0.46),
-        inset 0 1px 0 rgba(255,255,255,0.11);
-      padding: clamp(20px, 3vw, 30px);
-      display: grid;
-      gap: 14px;
-      align-items: center;
-      justify-items: center;
-      text-align: center;
-      transform: translateZ(0);
-    }
-
-    #prelude .mark {
-      width: min(260px, 56vw);
-      aspect-ratio: 1 / 1;
-      border-radius: 999px;
-      position: relative;
-      display: grid;
-      place-items: center;
-      background: rgba(255,255,255,0.018);
-      border: 1px solid var(--stroke);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.08),
-        inset 0 -18px 40px rgba(0,0,0,0.18),
-        0 22px 64px rgba(0,0,0,0.34);
-      overflow: hidden;
-
-      /* out-of-focus intro */
-      filter: blur(18px);
-      opacity: 0;
-      transform: translateY(10px) scale(0.985);
-      transition: filter 700ms ease, opacity 700ms ease, transform 700ms ease;
-    }
-
-    #prelude .mark img {
-      width: 84%;
-      height: 84%;
-      display: block;
-      object-fit: contain;
-    }
-
-
-    #prelude .wordmark {
-      width: min(980px, 92vw);
-      display: grid;
-      place-items: center;
-      max-width: 760px;
-
-      /* out-of-focus intro */
-      filter: blur(18px);
-      opacity: 0;
-      transform: translateY(10px);
-      transition: filter 700ms ease, opacity 700ms ease, transform 700ms ease;
-    }
-
-    #prelude .wordmark img {
-      width: min(100%, 760px);
-      height: auto;
-      display: block;
-    }
-
-    #prelude .hook {
-      font-size: 12px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--muted);
-      opacity: 0;
-      filter: blur(10px);
-      transform: translateY(8px);
-      transition: filter 700ms ease, opacity 700ms ease, transform 700ms ease;
-      margin-top: 2px;
-    }
-
-    #prelude .indicators {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--dot-gap);
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.022);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.07),
-        inset 0 -10px 20px rgba(0,0,0,0.10);
-
-      /* out-of-focus intro */
-      opacity: 0;
-      filter: blur(10px);
-      transform: translateY(8px);
-      transition: filter 700ms ease, opacity 700ms ease, transform 700ms ease;
-    }
-
-    .dot {
-      width: var(--dot-w);
-      height: var(--dot-h);
-      border-radius: 999px;
-      opacity: 0.16; /* OFF baseline */
-      background: rgba(255,255,255,0.10);
-      /* Sit “behind” the UI: less contrast, slightly recessed */
-      filter: saturate(0.92) brightness(0.96);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
-    }
-
-    /* OFF colors (red must feel muted/"dead", not alert) */
-    .dot.red { background: var(--red-off); opacity: 0.12; }
-    .dot.amber { background: var(--amber-on); opacity: 0.16; }
-    .dot.green { background: var(--green-on); opacity: 0.14; }
-
-    /* ----------------------------
-       Status indicator: live state (header)
-       - Current status: Active (taking work)
-       - Amber gets an imperceptible bias pulse
-       - Green stays on, but recessed
-       - Red stays dead
-    ----------------------------- */
-
-    @keyframes amberBias {
-      0%, 100% { opacity: 0.62; }
-      50% { opacity: 0.78; }
-    }
-
-    /* Apply ONLY to the three dots in the header trigger (not the legend rows) */
-    .legend-trigger.status-active > .dot.red {
-      opacity: 0.10;
-      box-shadow: none;
-      filter: saturate(0.85) brightness(0.90);
-    }
-
-    .legend-trigger.status-active > .dot.amber {
-      opacity: 0.62;
-      animation: amberBias 10s ease-in-out infinite;
-      box-shadow: 0 0 6px var(--glow-amber);
-    }
-
-    .legend-trigger.status-active > .dot.green {
-      opacity: 0.52;
-      box-shadow: 0 0 5px var(--glow-green);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .legend-trigger.status-active > .dot.amber { animation: none; }
-    }
-
-    /* 2s boot choreography */
-    @keyframes bootAmber {
-      0%, 18% { opacity: 0.16; filter: none; box-shadow: none; }
-      22%, 34% { opacity: 1.0; filter: brightness(1.18) saturate(1.12);
-        box-shadow: 0 0 10px var(--glow-amber), 0 0 18px rgba(224,138,26,0.18);
-      }
-      38%, 100% { opacity: 0.16; filter: none; box-shadow: none; }
-    }
-
-    @keyframes bootGreen {
-      0%, 44% { opacity: 0.14; filter: none; box-shadow: none; }
-      48%, 72% { opacity: 0.92; filter: brightness(1.18) saturate(1.12);
-        box-shadow: 0 0 10px var(--glow-green), 0 0 18px rgba(58,166,106,0.16);
-      }
-      76%, 100% { opacity: 0.14; filter: none; box-shadow: none; }
-    }
-
-    @keyframes bootAllFlash {
-      0%, 68% { opacity: inherit; filter: none; box-shadow: none; }
-      74%, 84% { opacity: 1.0; filter: brightness(1.12) saturate(1.08);
-        box-shadow: 0 0 12px rgba(255,255,255,0.10);
-      }
-      88%, 100% { opacity: inherit; filter: none; box-shadow: none; }
-    }
-
-    #prelude.is-active .dot.red {
-      /* red stays off overall but participates in the brief all-flash */
-      animation: bootAllFlash 2000ms ease 1;
-    }
-
-    #prelude.is-active .dot.amber {
-      animation: bootAmber 2000ms ease 1, bootAllFlash 2000ms ease 1;
-    }
-
-    #prelude.is-active .dot.green {
-      animation: bootGreen 2000ms ease 1, bootAllFlash 2000ms ease 1;
-    }
-
-    /* Reveal from out-of-focus (toggled via class instead of JS inline styles) */
-    #prelude.is-revealed .mark,
-    #prelude.is-revealed .wordmark,
-    #prelude.is-revealed .indicators,
-    #prelude.is-revealed .hook {
-      opacity: 1;
-      filter: blur(0px);
-      transform: translateY(0) scale(1);
-    }
-
-    /* Staggered reveal: mark -> indicators -> wordmark -> hook */
-    #prelude.is-revealed .mark { transition-delay: 120ms; }
-    #prelude.is-revealed .indicators { transition-delay: 420ms; }
-    #prelude.is-revealed .wordmark { transition-delay: 720ms; }
-    #prelude.is-revealed .hook {
-      opacity: 1;
-      filter: blur(0px);
-      transform: translateY(0);
-      transition-delay: 980ms;
-    }
-
-    #prelude.is-exiting {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 420ms ease;
-    }
-
-    /* Clean exit: fade the card + contents so there is no “ghost” mid-transition */
-    #prelude.is-exiting .prelude-card {
-      opacity: 0;
-      transform: translateY(-6px) scale(0.985);
-      transition: opacity 320ms ease, transform 320ms ease;
-    }
-
-    #prelude.is-exiting .mark,
-    #prelude.is-exiting .wordmark,
-    #prelude.is-exiting .indicators {
-      opacity: 0;
-      filter: blur(0px);
-      transform: translateY(-6px) scale(0.995);
-      transition: opacity 260ms ease, transform 260ms ease;
-    }
-
-    /* Reduced motion: keep it tasteful */
-    @media (prefers-reduced-motion: reduce) {
-      #prelude { transition: none; }
-      #prelude.is-exiting { transition: none; }
-      #prelude.is-exiting .prelude-card { transform: none; transition: none; }
-      #prelude.is-revealed .mark,
-      #prelude.is-revealed .indicators,
-      #prelude.is-revealed .wordmark,
-      #prelude.is-revealed .hook { transition-delay: 0ms; }
-    }
-
-    @media (max-width: 520px) {
-      #prelude .prelude-card { padding: 18px; }
-      #prelude .mark { width: min(230px, 70vw); }
-      #prelude .wordmark { max-width: 520px; }
-      #prelude .hook { font-size: 11px; }
-    }
-
-    /* ----------------------------
-       Site skeleton
-    ----------------------------- */
-
-    .shell {
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      padding: 18px 18px 0;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    .topbar {
-      max-width: var(--max);
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 10px;
-      align-items: center;
-      border-radius: 999px;
-      padding: 14px 16px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.04);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .brand .mini-mark {
-      width: 30px;
-      height: 30px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.03);
-      position: relative;
-      overflow: hidden;
-      display: grid;
-      place-items: center;
-    }
-
-    .brand .mini-mark img {
-      width: 86%;
-      height: 86%;
-      display: block;
-      object-fit: contain;
-    }
-
-    .brand .name {
-      display: block;
-      width: min(320px, 52vw);
-      opacity: 0.86;
-    }
-
-    .brand .name img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    .legend-trigger {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.03);
-      cursor: default;
-      position: relative;
-      user-select: none;
-    }
-
-    .legend-trigger .dot {
-      width: 2.5px;
-      height: 2.5px;
-      opacity: 0.18;
-      box-shadow: none;
-    }
-
-    .theme-toggle {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.03);
-      color: var(--muted);
-      cursor: pointer;
-      user-select: none;
-      font-size: 12px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      line-height: 1;
-    }
-
-    .theme-toggle:hover { background: rgba(255,255,255,0.06); }
-
-    .theme-toggle .chip {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.08);
-    }
-
-    :root[data-theme="light"] .theme-toggle .chip { background: rgba(0,0,0,0.12); }
-
-    /* Hover popup (desktop) */
-    .legend {
-      position: absolute;
-      right: 0;
-      top: calc(100% + 10px);
-      width: min(320px, 80vw);
-      border-radius: var(--r-lg);
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow:
-        0 18px 50px rgba(0,0,0,0.35),
-        inset 0 1px 0 rgba(255,255,255,0.10),
-        inset 0 -18px 38px rgba(0,0,0,0.22);
-      padding: 12px 12px;
-      opacity: 0;
-      transform: translateY(-6px);
-      pointer-events: none;
-      transition: opacity 160ms ease, transform 160ms ease;
-      color: var(--text);
-    }
-
-    .legend-trigger:hover .legend {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-
-    .legend h4 {
-      margin: 0 0 8px;
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: inherit;
-      opacity: 0.75;
-    }
-
-    .legend .row {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 10px;
-      align-items: center;
-      padding: 8px 6px;
-      border-top: 1px solid var(--stroke);
-    }
-
-    .legend .row:first-of-type { border-top: 0; }
-    .legend .label { font-size: 12px; opacity: 0.88; }
-    .legend .desc { font-size: 12px; opacity: 0.72; }
-
-    main {
-      padding: 16px 14px 64px;
-    }
-
-    /* ----------------------------
-       Field Notes (feed placeholder)
-       - IBM Plex Mono microbrand
-       - Modular grid with 3 card sizes
-    ----------------------------- */
-
-    .fieldnotes {
-      max-width: var(--max);
-      margin: 18px auto 0;
-      border-radius: var(--r-xl);
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
-      box-shadow: 0 26px 62px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.10);
-      padding: clamp(16px, 3.6vw, 26px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .fieldnotes::before {
-      content: "";
-      position: absolute;
-      inset: -2px;
-      background:
-        radial-gradient(700px 320px at 12% 18%, rgba(255,255,255,0.08), transparent 60%),
-        radial-gradient(520px 280px at 86% 8%, rgba(255,255,255,0.06), transparent 60%);
-      pointer-events: none;
-      opacity: 0.9;
-    }
-
-    .fieldnotes-inner {
-      position: relative;
-      display: grid;
-      gap: 14px;
-    }
-
-    .fieldnotes-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--stroke);
-    }
-
-    .fieldnotes-title {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-      font-family: var(--field-font);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--text);
-    }
-
-    .fieldnotes-title img {
-      height: 28px;
-      width: auto;
-      display: block;
-      opacity: 0.92;
-    }
-
-    .fieldnotes-meta {
-      font-family: var(--field-font);
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-    }
-
-    .feed {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 12px;
-      padding-top: 12px;
-    }
-
-    .card {
-      border-radius: var(--r-lg);
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.03);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-      overflow: hidden;
-      position: relative;
-      min-height: 140px;
-      display: grid;
-      grid-template-rows: 1fr;
-    }
-
-    .card-content {
-      padding: 14px;
-      font-family: var(--field-font);
-      color: var(--text);
-      line-height: 1.5;
-      font-size: 13px;
-    }
-
-    .card .label {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      font-family: var(--field-font);
-      font-size: 11px;
-      letter-spacing: 0.10em;
-      text-transform: uppercase;
-      color: var(--muted);
-      opacity: 0.9;
-      pointer-events: none;
-    }
-
-    /* 3 modular sizes */
-    .card.s { grid-column: span 4; min-height: 160px; }
-    .card.m { grid-column: span 6; min-height: 220px; }
-    .card.l { grid-column: span 8; min-height: 300px; }
-
-    /* Media cards (image/video poster) */
-    .card-media {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      filter: saturate(0.98) contrast(1.02);
-    }
-
-    /* Text posts fill like an image */
-    .card.text {
-      background:
-        radial-gradient(420px 260px at 18% 22%, rgba(255,255,255,0.07), transparent 60%),
-        rgba(255,255,255,0.03);
-    }
-
-    .card.text .card-content {
-      display: grid;
-      align-content: end;
-      padding-top: 46px;
-    }
-
-    .card.text .quote {
-      font-size: 14px;
-      letter-spacing: 0.01em;
-      color: var(--text);
-    }
-
-    .card.text .source {
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-    }
-
-    /* Field Notes feed: interactive cards */
-    .card-link {
-      display: block;
-      color: inherit;
-      text-decoration: none;
-      height: 100%;
-    }
-
-    .card:hover {
-      border-color: var(--stroke-2);
-      background: rgba(255,255,255,0.045);
-    }
-
-    .card .meta-bar {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      font-family: var(--field-font);
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      color: var(--muted);
-      opacity: 0.9;
-      pointer-events: none;
-    }
-
-    .card .meta-bar .date {
-      white-space: nowrap;
-      opacity: 0.85;
-    }
-
-    .card .meta-bar .type {
-      text-transform: uppercase;
-      letter-spacing: 0.10em;
-      opacity: 0.85;
-    }
-
-    .card.media .label { display: none; }
-
-    .card.media .scrim {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(520px 320px at 18% 18%, rgba(255,255,255,0.10), transparent 62%),
-        linear-gradient(180deg, rgba(0,0,0,0.00), rgba(0,0,0,0.55));
-      pointer-events: none;
-      opacity: 0.85;
-    }
-
-    :root[data-theme="light"] .card.media .scrim {
-      background:
-        radial-gradient(520px 320px at 18% 18%, rgba(255,255,255,0.22), transparent 62%),
-        linear-gradient(180deg, rgba(255,255,255,0.00), rgba(0,0,0,0.22));
-      opacity: 0.9;
-    }
-
-    .empty-feed {
-      border-radius: var(--r-lg);
-      border: 1px dashed var(--stroke);
-      padding: 18px;
-      font-family: var(--field-font);
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    @media (max-width: 860px) {
-      .card.s { grid-column: span 6; }
-      .card.m { grid-column: span 12; }
-      .card.l { grid-column: span 12; }
-    }
-
-    @media (max-width: 520px) {
-      .fieldnotes-title img { height: 24px; }
-      .feed { grid-template-columns: repeat(6, 1fr); }
-      .card.s, .card.m, .card.l { grid-column: span 6; }
-    }
-
-    .hero {
-      max-width: var(--max);
-      margin: 18px auto 0;
-      border-radius: var(--r-xl);
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-      box-shadow: 0 30px 70px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10);
-      padding: clamp(18px, 4vw, 34px);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: -2px;
-      background:
-        radial-gradient(700px 320px at 15% 30%, rgba(255,255,255,0.10), transparent 60%),
-        radial-gradient(540px 280px at 80% 10%, rgba(255,255,255,0.08), transparent 60%);
-      pointer-events: none;
-    }
-
-    .hero-inner {
-      position: relative;
-      display: grid;
-      gap: 18px;
-    }
-
-    .headline {
-      font-size: clamp(34px, 5.2vw, 58px);
-      line-height: 1.02;
-      margin: 0;
-      letter-spacing: -0.02em;
-    }
-
-    .sub {
-      margin: 0;
-      max-width: 60ch;
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1.55;
-    }
-
-    .cta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-top: 6px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke-2);
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      text-decoration: none;
-      font-size: 13px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .btn:hover { background: rgba(255,255,255,0.09); }
-
-    .btn.secondary {
-      border-color: var(--stroke);
-      background: rgba(255,255,255,0.03);
-      color: var(--muted);
-    }
-
-    /* Mobile tweaks */
-    @media (max-width: 520px) {
-      header { padding: 16px 12px 0; }
-      main { padding: 14px 12px 56px; }
-      .legend { display: none; } /* mobile: we can implement tap-to-open later */
-    }
-  </style>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Favicon (minimal dot, neutral) -->
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='6' fill='%23000'/%3E%3C/svg%3E"
+  >
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="./css/styles.css" />
 </head>
 
 <body>
-  <!-- Prelude Overlay (runs on page initiation). Assets expected in /assets: scott-visual-black.png, scott-visual-white.png, scott-wordmark-black.png, scott-wordmark-white.png -->
+
+  <!-- =========================
+       Prelude / Boot Sequence
+       ========================= -->
   <div id="prelude" aria-hidden="true">
-    <div class="prelude-card" role="presentation">
-      <div class="mark">
+    <div class="prelude-card">
+
+      <!-- Indicators (reason to exist: system state) -->
+      <div class="prelude-indicators" aria-hidden="true">
+        <span class="dot red"></span>
+        <span class="dot amber"></span>
+        <span class="dot green"></span>
+      </div>
+
+      <!-- Visual Mark -->
+      <div class="prelude-mark">
         <img
           src="./assets/scott-visual-black.png"
-          data-src-dark="./assets/scott-visual-white.png"
           data-src-light="./assets/scott-visual-black.png"
+          data-src-dark="./assets/scott-visual-white.png"
           alt=""
         />
       </div>
 
-      <div class="indicators" aria-hidden="true" aria-label="Boot sequence">
-        <span class="dot red" title="Red (off)"></span>
-        <span class="dot amber" title="Amber"></span>
-        <span class="dot green" title="Green"></span>
-      </div>
-
-      <div class="wordmark" aria-label="Scott Bertrand wordmark">
+      <!-- Wordmark -->
+      <div class="prelude-wordmark">
         <img
           src="./assets/scott-wordmark-black.png"
-          data-src-dark="./assets/scott-wordmark-white.png"
           data-src-light="./assets/scott-wordmark-black.png"
-          alt="SCOTT BERTRAND"
+          data-src-dark="./assets/scott-wordmark-white.png"
+          alt="Scott Bertrand"
         />
       </div>
 
-      <div class="hook">Systems • Ops • Brand clarity</div>
     </div>
   </div>
 
+  <!-- =========================
+       App Shell
+       ========================= -->
   <div class="shell">
-    <header>
+
+    <!-- Header -->
+    <header class="site-header">
       <div class="topbar">
-        <div class="brand" aria-label="Scott Bertrand">
-          <div class="mini-mark" aria-hidden="true">
+
+        <!-- Brand (refreshes page) -->
+        <a class="brand" href="./" aria-label="Refresh homepage">
+          <span class="brand-mark">
             <img
               src="./assets/scott-visual-black.png"
-              data-src-dark="./assets/scott-visual-white.png"
               data-src-light="./assets/scott-visual-black.png"
+              data-src-dark="./assets/scott-visual-white.png"
               alt=""
             />
-          </div>
-          <div class="name">
+          </span>
+          <span class="brand-wordmark">
             <img
               src="./assets/scott-wordmark-black.png"
-              data-src-dark="./assets/scott-wordmark-white.png"
               data-src-light="./assets/scott-wordmark-black.png"
+              data-src-dark="./assets/scott-wordmark-white.png"
               alt="Scott Bertrand"
             />
-          </div>
-        </div>
+          </span>
+        </a>
 
-        <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">
-          <span class="chip" aria-hidden="true"></span>
-          <span class="label">Theme</span>
+        <!-- Theme Toggle -->
+        <button
+          class="chip-btn"
+          id="themeToggle"
+          type="button"
+          aria-label="Toggle theme"
+        >
+          Theme
         </button>
 
-        <div class="legend-trigger status-active" aria-label="Status legend">
-          <span class="dot red" aria-hidden="true"></span>
-          <span class="dot amber" aria-hidden="true"></span>
-          <span class="dot green" aria-hidden="true"></span>
+        <!-- Field Notes Nav -->
+        <a
+          class="chip-btn"
+          href="#field-notes"
+          aria-label="View Field Notes"
+        >
+          Field Notes
+        </a>
 
-          <div class="legend" role="dialog" aria-label="Status indicator legend">
-            <h4>Status indicator</h4>
-            <div class="row">
-              <div class="dot red" aria-hidden="true"></div>
-              <div>
-                <div class="label">Offline</div>
-                <div class="desc">Unavailable or not currently taking on work.</div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="dot amber" aria-hidden="true"></div>
-              <div>
-                <div class="label">Active</div>
-                <div class="desc">In progress: building, iterating, or in a live engagement.</div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="dot green" aria-hidden="true"></div>
-              <div>
-                <div class="label">Ready</div>
-                <div class="desc">Available for scoped work or new conversations.</div>
-              </div>
-            </div>
-          </div>
+        <!-- Status Indicator -->
+        <div class="status-indicator" aria-hidden="true">
+          <span class="dot red"></span>
+          <span class="dot amber"></span>
+          <span class="dot green"></span>
         </div>
+
       </div>
     </header>
 
+    <!-- =========================
+         Main Content
+         ========================= -->
     <main>
-      <section class="hero" aria-label="Intro">
-        <div class="hero-inner">
-          <h1 class="headline">Systems that make the day run clean.</h1>
-          <p class="sub">
-            I work across operations and brand systems to reduce friction where performance slips quietly—at the counter,
-            in handoffs, and in the routines teams rely on. The output is simple: clearer defaults, fewer misses, and a
-            calmer day that holds up under pressure.
-          </p>
-          <div class="cta-row">
-            <a class="btn" href="#" aria-label="Email">Contact</a>
-            <a class="btn secondary" href="#" aria-label="Work">Work</a>
-          </div>
+
+      <!-- Hero (hidden on Field Notes route) -->
+      <section class="hero" aria-label="Introduction">
+        <h1 class="hero-title">Systems that make the day run clean.</h1>
+        <p class="hero-sub">
+          I work across operations and brand systems to reduce friction where
+          performance slips quietly — at the counter, in handoffs, and in the
+          routines teams rely on.
+        </p>
+
+        <div class="hero-actions">
+          <a href="mailto:hello@scottbertrand.com" class="btn">
+            Contact
+          </a>
         </div>
       </section>
 
-      <section class="fieldnotes" aria-label="Field Notes">
-        <div class="fieldnotes-inner">
-          <div class="fieldnotes-head">
-            <div class="fieldnotes-title" aria-label="Field Notes title">
-              <img src="./assets/marks/field-notes.png" alt="FIELD NOTES" />
-            </div>
-            <div class="fieldnotes-meta">Newest first • Modular grid</div>
-          </div>
+      <!-- =========================
+           Field Notes (Primary Page)
+           ========================= -->
+      <section
+        class="field-notes"
+        id="field-notes"
+        aria-label="Field Notes"
+      >
 
-          <div class="feed" aria-label="Field Notes feed" id="fieldnotesFeed">
-            <div class="empty-feed" id="fieldnotesEmpty">
-              Loading Field Notes…
-            </div>
+        <header class="field-notes-header">
+          <img
+            src="./assets/marks/field-notes.png"
+            alt="Field Notes"
+            class="field-notes-mark"
+          />
+          <span class="field-notes-meta">
+            Newest first · Modular grid
+          </span>
+        </header>
+
+        <div
+          class="field-notes-feed"
+          id="fieldNotesFeed"
+        >
+          <!-- JS injects cards -->
+          <div class="field-notes-empty" id="fieldNotesEmpty">
+            Loading Field Notes…
           </div>
         </div>
+
       </section>
+
     </main>
   </div>
 
-  <script>
-    (function () {
-      // ----------------------------
-      // Theme (light/dark) + asset swapping
-      // ----------------------------
-      const root = document.documentElement;
-      const THEME_KEY = 'sb_theme';
-
-      // ----------------------------
-      // Field Notes (Option A): Notion public database -> rendered feed
-      // Uses a lightweight public endpoint (no auth) for speed/ease.
-      // REQUIREMENT: the Notion database page must be Published to web.
-      // ----------------------------
-
-      // TODO: replace with your real Notion page id (from the public URL)
-      // Example URL: https://xxxxx.notion.site/<PAGE_ID>
-      const FIELDNOTES_PAGE_ID = '2ea3c4a766e480b7a46ed6bb8d6cde82'; // Field notes database/page id from your Notion URL
-
-      // Public read endpoint (no token). If this ever changes, we can swap providers.
-      const FIELDNOTES_API = (pageId) => `https://notion-api.splitbee.io/v1/table/${pageId}`;
-
-      const feedEl = document.getElementById('fieldnotesFeed');
-      const emptyEl = document.getElementById('fieldnotesEmpty');
-
-      const fmtDate = (v) => {
-        if (!v) return '';
-        try {
-          const d = new Date(v);
-          if (Number.isNaN(d.getTime())) return String(v);
-          return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-        } catch (_) {
-          return String(v);
-        }
-      };
-
-      const pickSize = (i, hasMedia) => {
-        // Gentle modular rhythm: prioritize larger cards for media.
-        const cycle = hasMedia ? ['l','m','m','s','m'] : ['m','s','m','s','m'];
-        return cycle[i % cycle.length];
-      };
-
-      const mediaUrlFromRow = (row) => {
-        // splitbee responses often represent files as strings or arrays; handle both.
-        const m = row?.Media;
-        if (!m) return '';
-        if (typeof m === 'string') return m;
-        if (Array.isArray(m) && m.length) {
-          const first = m[0];
-          if (typeof first === 'string') return first;
-          if (first?.url) return first.url;
-        }
-        if (m?.url) return m.url;
-        return '';
-      };
-
-      const isVideo = (url) => {
-        if (!url) return false;
-        const u = url.toLowerCase();
-        return u.endsWith('.mp4') || u.endsWith('.mov') || u.includes('video');
-      };
-
-      const escapeHtml = (s) => String(s ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-
-      const renderCard = (post, i) => {
-        const title = post.Title || '';
-        const type = (post.Type || 'Note');
-        const excerpt = post.Excerpt || '';
-        const published = post.Published || post.Date || '';
-        const url = post.__url || '#';
-        const media = mediaUrlFromRow(post);
-        const hasMedia = Boolean(media);
-        const size = pickSize(i, hasMedia);
-
-        // Text-style card content should visually “fill” like an image.
-        if (!hasMedia) {
-          return `
-            <article class="card ${size} text" aria-label="Field note">
-              <a class="card-link" href="#" role="button" aria-haspopup="dialog" data-notion-url="${escapeHtml(url)}" aria-label="Open field note">
-                <div class="label">${escapeHtml(type)}</div>
-                <div class="card-content">
-                  <div class="quote">${escapeHtml(excerpt || title)}</div>
-                  <div class="source">${escapeHtml(title ? title : 'Field note')}</div>
-                </div>
-                <div class="meta-bar" aria-hidden="true">
-                  <span class="type">${escapeHtml(type)}</span>
-                  <span class="date">${escapeHtml(fmtDate(published))}</span>
-                </div>
-              </a>
-            </article>
-          `;
-        }
-
-        // Media card
-        const mediaEl = isVideo(media)
-          ? `<video class="card-media" src="${escapeHtml(media)}" muted playsinline preload="metadata"></video>`
-          : `<img class="card-media" src="${escapeHtml(media)}" alt="" loading="lazy" />`;
-
-        return `
-          <article class="card ${size} media" aria-label="Field note media">
-            <a class="card-link" href="#" role="button" aria-haspopup="dialog" data-notion-url="${escapeHtml(url)}" aria-label="Open field note">
-              ${mediaEl}
-              <div class="scrim" aria-hidden="true"></div>
-              <div class="card-content" style="position:absolute; inset:auto 0 0 0; padding:14px; padding-bottom:34px;">
-                <div class="quote">${escapeHtml(excerpt || title || 'Field note')}</div>
-              </div>
-              <div class="meta-bar" aria-hidden="true">
-                <span class="type">${escapeHtml(type)}</span>
-                <span class="date">${escapeHtml(fmtDate(published))}</span>
-              </div>
-            </a>
-          </article>
-        `;
-      };
-
-      async function loadFieldNotes() {
-        if (!feedEl || !emptyEl) return;
-
-        // If the page id looks unset/placeholder, show instructions.
-        if (!FIELDNOTES_PAGE_ID || FIELDNOTES_PAGE_ID.length < 24) {
-          emptyEl.textContent = 'Set your Notion page id in the code (FIELDNOTES_PAGE_ID), then refresh.';
-          return;
-        }
-
-        try {
-          emptyEl.textContent = 'Loading Field Notes…';
-          const res = await fetch(FIELDNOTES_API(FIELDNOTES_PAGE_ID), { cache: 'no-store' });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const rows = await res.json();
-
-          // Normalize, filter, sort newest-first.
-          // IMPORTANT: If `Public` is missing/blank on a row, we treat it as visible so you can confirm the feed wiring.
-          // Once confirmed, you can enforce Public-only by changing `publicDefaultVisible` to false.
-          const publicDefaultVisible = true;
-
-          const isPublic = (r) => {
-            const v = r?.Public;
-            if (v === undefined || v === null || v === '') return publicDefaultVisible;
-            if (typeof v === 'boolean') return v;
-            if (typeof v === 'number') return v === 1;
-            const s = String(v).trim().toLowerCase();
-            return s === 'true' || s === 'yes' || s === 'y' || s === '1' || s === 'checked' || s === 'on' || s === '✅' || s === '✔' || s === '✔︎';
-          };
-
-          const allRows = Array.isArray(rows) ? rows : [];
-          const posts = allRows.filter(isPublic);
-
-          posts.sort((a, b) => {
-            const da = new Date(a?.Published || a?.Date || 0).getTime() || 0;
-            const db = new Date(b?.Published || b?.Date || 0).getTime() || 0;
-            return db - da;
-          });
-
-          // Provide a Notion URL if splitbee rows include ids.
-          // If you want a custom domain path later, we’ll swap this.
-          posts.forEach((p) => {
-            if (!p.__url) {
-              const pid = p?.id || p?.Id || '';
-              if (pid) p.__url = `https://notion.so/${pid.replaceAll('-', '')}`;
-            }
-          });
-
-          if (!posts.length) {
-            // If rows exist but nothing passes the Public filter, be explicit.
-            if (allRows.length) {
-              const sample = allRows.slice(0, 3).map((r) => {
-                const t = r?.Title || r?.Name || 'Untitled';
-                return `${t} (Public: ${String(r?.Public)})`;
-              }).join(' • ');
-              emptyEl.textContent = `Field Notes loaded (${allRows.length} rows) but none are visible yet. Set Public ✅ on a post (or leave Public blank while wiring). Sample: ${sample}`;
-              return;
-            }
-            emptyEl.textContent = 'No Field Notes returned from Notion yet. Confirm the database is Published to web and the page id is correct.';
-            return;
-          }
-
-          emptyEl.remove();
-          feedEl.insertAdjacentHTML('beforeend', posts.map(renderCard).join(''));
-        } catch (err) {
-          console.error('[Field Notes] load failed:', err);
-          emptyEl.textContent = 'Could not load Field Notes. Confirm: (1) the Notion database page is Published to web, (2) the FIELDNOTES_PAGE_ID matches the database/page id in the public URL, and (3) you have at least one row. Then hard refresh.';
-        }
-      }
-
-      const prefersDark = () =>
-        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-      const readTheme = () => {
-        try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; }
-      };
-
-      const writeTheme = (value) => {
-        try { localStorage.setItem(THEME_KEY, value); } catch (e) {}
-      };
-
-      function swapThemeAssets(theme) {
-        const imgs = document.querySelectorAll('img[data-src-dark][data-src-light]');
-        imgs.forEach((img) => {
-          const next = theme === 'dark'
-            ? img.getAttribute('data-src-dark')
-            : img.getAttribute('data-src-light');
-          if (next) img.src = next;
-        });
-      }
-
-      function applyTheme(theme) {
-        root.setAttribute('data-theme', theme);
-        swapThemeAssets(theme);
-      }
-
-      // Initial theme: stored override, otherwise system preference
-      const stored = readTheme();
-      applyTheme(stored || (prefersDark() ? 'dark' : 'light'));
-
-      // If no stored override, keep in sync with OS changes
-      if (!stored && window.matchMedia) {
-        const mq = window.matchMedia('(prefers-color-scheme: dark)');
-        const onChange = () => applyTheme(prefersDark() ? 'dark' : 'light');
-        if (mq.addEventListener) mq.addEventListener('change', onChange);
-        else if (mq.addListener) mq.addListener(onChange);
-      }
-
-      // Manual toggle: locks an explicit theme
-      const themeBtn = document.querySelector('.theme-toggle');
-      if (themeBtn) {
-        themeBtn.addEventListener('click', () => {
-          const current = root.getAttribute('data-theme') || (prefersDark() ? 'dark' : 'light');
-          const next = current === 'dark' ? 'light' : 'dark';
-          writeTheme(next);
-          applyTheme(next);
-        });
-      }
-
-      const prelude = document.getElementById('prelude');
-      if (!prelude) return;
-
-      // Run the boot sequence once per browser tab/session.
-      try {
-        const alreadyBooted = sessionStorage.getItem('sb_booted') === '1';
-        if (alreadyBooted) {
-          prelude.remove();
-          return;
-        }
-        sessionStorage.setItem('sb_booted', '1');
-      } catch (e) {
-        // If storage is blocked, just run normally.
-      }
-
-      prelude.classList.add('is-active');
-      prelude.setAttribute('aria-hidden', 'false');
-
-      // Reveal from out-of-focus (CSS handles the actual transitions)
-      requestAnimationFrame(() => prelude.classList.add('is-revealed'));
-
-      // Total boot time: 2.7s
-      const totalMs = 2700;
-      const exitMs = 420;
-
-      setTimeout(() => {
-        // Prevent any interaction / focus weirdness during fade-out
-        prelude.style.pointerEvents = 'none';
-        prelude.classList.add('is-exiting');
-        setTimeout(() => prelude.remove(), exitMs + 120);
-      }, totalMs);
-
-      // Load Field Notes automatically (no hash required).
-      loadFieldNotes();
-
-      // ----------------------------
-      // Field Notes modal handling
-      // (Keeps everything on-site; no navigation to Notion on card click.)
-      // ----------------------------
-      const modal = document.getElementById('fnModal');
-      const modalContent = document.getElementById('fnModalContent');
-      const modalClose = document.getElementById('fnClose');
-      const modalOriginal = document.getElementById('fnOriginal');
-
-      const closeModal = () => {
-        if (!modal || !modalContent) return;
-        modal.style.display = 'none';
-        modalContent.innerHTML = '';
-        // Ensure the page regains scroll on close
-        document.documentElement.style.overflow = '';
-      };
-
-      // If modal elements aren't present for any reason, don't break the feed.
-      const modalReady = Boolean(modal && modalContent && modalClose && modalOriginal);
-
-      document.addEventListener('click', (e) => {
-        const link = e.target.closest('.card-link');
-        if (!link) return;
-
-        // Prevent ANY navigation (including any unexpected default from nested elements)
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!modalReady) return;
-
-        const notionUrl = link.getAttribute('data-notion-url');
-        if (!notionUrl) return;
-
-        const card = link.closest('.card');
-        if (!card) return;
-
-        // Clone card content into the modal
-        modalContent.innerHTML = card.innerHTML;
-
-        // Point to your Notion site for the original (only when user clicks OPEN ORIGINAL)
-        modalOriginal.href = notionUrl
-          .replace('https://notion.so', 'https://lilac-stocking-b2d.notion.site')
-          .replace('https://www.notion.so', 'https://lilac-stocking-b2d.notion.site');
-
-        modal.style.display = 'block';
-        // Lock scroll while modal is open
-        document.documentElement.style.overflow = 'hidden';
-      }, { capture: true });
-
-      if (modalReady) {
-        modalClose.addEventListener('click', (e) => {
-          e.preventDefault();
-          closeModal();
-        });
-
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) closeModal();
-        });
-
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') closeModal();
-        });
-      }
-    })();
-  </script>
-  <!-- Field Notes Modal -->
-  <div id="fnModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.65); backdrop-filter:blur(12px);">
-    <div id="fnModalCard" style="
-      max-width:820px;
-      margin:6vh auto;
-      background:var(--bg);
-      border-radius:24px;
-      border:1px solid var(--stroke);
-      padding:22px;
-      position:relative;
-      box-shadow:0 40px 120px rgba(0,0,0,0.6);
-      font-family:var(--field-font);
-    ">
-      <button id="fnClose" style="
-        position:absolute;
-        top:14px;
-        right:16px;
-        background:none;
-        border:none;
-        color:var(--muted);
-        font-size:13px;
-        letter-spacing:.12em;
-        cursor:pointer;
-      ">CLOSE</button>
-
-      <div id="fnModalContent"></div>
-
-      <div style="margin-top:18px; font-size:12px; color:var(--muted); letter-spacing:.08em;">
-        <a id="fnOriginal" href="#" target="_blank" rel="noopener" style="color:inherit; text-decoration:none;">
-          OPEN ORIGINAL ↗
+  <!-- =========================
+       Field Notes Modal
+       ========================= -->
+  <div id="fieldNotesModal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="modal-close" type="button">Close</button>
+      <div class="modal-content" id="fieldNotesModalContent"></div>
+      <div class="modal-actions">
+        <a
+          id="fieldNotesOriginal"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        >
+          Open original ↗
         </a>
       </div>
     </div>
   </div>
+
+  <!-- Scripts -->
+  <script src="./js/app.js" defer></script>
 </body>
 </html>
