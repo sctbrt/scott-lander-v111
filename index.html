@@ -1066,12 +1066,22 @@
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const rows = await res.json();
 
-          // Normalize, filter to Public=true, sort newest first.
-          const posts = (Array.isArray(rows) ? rows : []).filter((r) => {
-            // Notion checkbox might come through as true/false or "Yes".
+          // Normalize, filter, sort newest-first.
+          // IMPORTANT: If `Public` is missing/blank on a row, we treat it as visible so you can confirm the feed wiring.
+          // Once confirmed, you can enforce Public-only by changing `publicDefaultVisible` to false.
+          const publicDefaultVisible = true;
+
+          const isPublic = (r) => {
             const v = r?.Public;
-            return v === true || v === 'true' || v === 'Yes' || v === 'yes' || v === 1;
-          });
+            if (v === undefined || v === null || v === '') return publicDefaultVisible;
+            if (typeof v === 'boolean') return v;
+            if (typeof v === 'number') return v === 1;
+            const s = String(v).trim().toLowerCase();
+            return s === 'true' || s === 'yes' || s === 'y' || s === '1' || s === 'checked' || s === 'on' || s === '✅' || s === '✔' || s === '✔︎';
+          };
+
+          const allRows = Array.isArray(rows) ? rows : [];
+          const posts = allRows.filter(isPublic);
 
           posts.sort((a, b) => {
             const da = new Date(a?.Published || a?.Date || 0).getTime() || 0;
@@ -1089,14 +1099,24 @@
           });
 
           if (!posts.length) {
-            emptyEl.textContent = 'No public Field Notes yet. In Notion, set Public ✅ on a post to publish it here.';
+            // If rows exist but nothing passes the Public filter, be explicit.
+            if (allRows.length) {
+              const sample = allRows.slice(0, 3).map((r) => {
+                const t = r?.Title || r?.Name || 'Untitled';
+                return `${t} (Public: ${String(r?.Public)})`;
+              }).join(' • ');
+              emptyEl.textContent = `Field Notes loaded (${allRows.length} rows) but none are visible yet. Set Public ✅ on a post (or leave Public blank while wiring). Sample: ${sample}`;
+              return;
+            }
+            emptyEl.textContent = 'No Field Notes returned from Notion yet. Confirm the database is Published to web and the page id is correct.';
             return;
           }
 
           emptyEl.remove();
           feedEl.insertAdjacentHTML('beforeend', posts.map(renderCard).join(''));
         } catch (err) {
-          emptyEl.textContent = 'Could not load Field Notes. Confirm the database is published to web, and the page id is correct.';
+          console.error('[Field Notes] load failed:', err);
+          emptyEl.textContent = 'Could not load Field Notes. Confirm: (1) the Notion database page is Published to web, (2) the FIELDNOTES_PAGE_ID matches the database/page id in the public URL, and (3) you have at least one row. Then hard refresh.';
         }
       }
 
