@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
   <title>Scott Bertrand</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='6' fill='%23ffffff'/%3E%3C/svg%3E">
 
   <!--
@@ -47,10 +50,11 @@
       --max: 980px;
 
       /* Indicator dot dimensions (Rams/Braun: subtle, diagnostic) */
-      --dot-w: 4px;
-      --dot-h: 4px;
-      --dot-gap: 7px;
+      --dot-w: 3px;
+      --dot-h: 3px;
+      --dot-gap: 8px;
 
+      --field-font: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
 
@@ -199,14 +203,52 @@
       width: var(--dot-w);
       height: var(--dot-h);
       border-radius: 999px;
-      opacity: 0.20; /* OFF baseline */
+      opacity: 0.16; /* OFF baseline */
       background: rgba(255,255,255,0.10);
+      /* Sit “behind” the UI: less contrast, slightly recessed */
+      filter: saturate(0.92) brightness(0.96);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
     }
 
     /* OFF colors (red must feel muted/"dead", not alert) */
     .dot.red { background: var(--red-off); opacity: 0.12; }
     .dot.amber { background: var(--amber-on); opacity: 0.16; }
     .dot.green { background: var(--green-on); opacity: 0.14; }
+
+    /* ----------------------------
+       Status indicator: live state (header)
+       - Current status: Active (taking work)
+       - Amber gets an imperceptible bias pulse
+       - Green stays on, but recessed
+       - Red stays dead
+    ----------------------------- */
+
+    @keyframes amberBias {
+      0%, 100% { opacity: 0.62; }
+      50% { opacity: 0.78; }
+    }
+
+    /* Apply ONLY to the three dots in the header trigger (not the legend rows) */
+    .legend-trigger.status-active > .dot.red {
+      opacity: 0.10;
+      box-shadow: none;
+      filter: saturate(0.85) brightness(0.90);
+    }
+
+    .legend-trigger.status-active > .dot.amber {
+      opacity: 0.62;
+      animation: amberBias 10s ease-in-out infinite;
+      box-shadow: 0 0 6px var(--glow-amber);
+    }
+
+    .legend-trigger.status-active > .dot.green {
+      opacity: 0.52;
+      box-shadow: 0 0 5px var(--glow-green);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .legend-trigger.status-active > .dot.amber { animation: none; }
+    }
 
     /* 2s boot choreography */
     @keyframes bootAmber {
@@ -356,7 +398,12 @@
       user-select: none;
     }
 
-    .legend-trigger .dot { width: 3px; height: 3px; opacity: 0.26; }
+    .legend-trigger .dot {
+      width: 2.5px;
+      height: 2.5px;
+      opacity: 0.18;
+      box-shadow: none;
+    }
 
     .theme-toggle {
       display: inline-flex;
@@ -396,10 +443,13 @@
       width: min(320px, 80vw);
       border-radius: var(--r-lg);
       border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 18px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10);
+      box-shadow:
+        0 18px 50px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        inset 0 -18px 38px rgba(0,0,0,0.22);
       padding: 12px 12px;
       opacity: 0;
       transform: translateY(-6px);
@@ -438,6 +488,168 @@
 
     main {
       padding: 16px 14px 64px;
+    }
+
+    /* ----------------------------
+       Field Notes (feed placeholder)
+       - IBM Plex Mono microbrand
+       - Modular grid with 3 card sizes
+    ----------------------------- */
+
+    .fieldnotes {
+      max-width: var(--max);
+      margin: 18px auto 0;
+      border-radius: var(--r-xl);
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+      box-shadow: 0 26px 62px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.10);
+      padding: clamp(16px, 3.6vw, 26px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fieldnotes::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background:
+        radial-gradient(700px 320px at 12% 18%, rgba(255,255,255,0.08), transparent 60%),
+        radial-gradient(520px 280px at 86% 8%, rgba(255,255,255,0.06), transparent 60%);
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    .fieldnotes-inner {
+      position: relative;
+      display: grid;
+      gap: 14px;
+    }
+
+    .fieldnotes-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--stroke);
+    }
+
+    .fieldnotes-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      font-family: var(--field-font);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .fieldnotes-title img {
+      height: 28px;
+      width: auto;
+      display: block;
+      opacity: 0.92;
+    }
+
+    .fieldnotes-meta {
+      font-family: var(--field-font);
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .feed {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      padding-top: 12px;
+    }
+
+    .card {
+      border-radius: var(--r-lg);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.03);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+      overflow: hidden;
+      position: relative;
+      min-height: 140px;
+      display: grid;
+      grid-template-rows: 1fr;
+    }
+
+    .card-content {
+      padding: 14px;
+      font-family: var(--field-font);
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .card .label {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-family: var(--field-font);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    /* 3 modular sizes */
+    .card.s { grid-column: span 4; min-height: 160px; }
+    .card.m { grid-column: span 6; min-height: 220px; }
+    .card.l { grid-column: span 8; min-height: 300px; }
+
+    /* Media cards (image/video poster) */
+    .card-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(0.98) contrast(1.02);
+    }
+
+    /* Text posts fill like an image */
+    .card.text {
+      background:
+        radial-gradient(420px 260px at 18% 22%, rgba(255,255,255,0.07), transparent 60%),
+        rgba(255,255,255,0.03);
+    }
+
+    .card.text .card-content {
+      display: grid;
+      align-content: end;
+      padding-top: 46px;
+    }
+
+    .card.text .quote {
+      font-size: 14px;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    .card.text .source {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 860px) {
+      .card.s { grid-column: span 6; }
+      .card.m { grid-column: span 12; }
+      .card.l { grid-column: span 12; }
+    }
+
+    @media (max-width: 520px) {
+      .fieldnotes-title img { height: 24px; }
+      .feed { grid-template-columns: repeat(6, 1fr); }
+      .card.s, .card.m, .card.l { grid-column: span 6; }
     }
 
     .hero {
@@ -582,7 +794,7 @@
           <span class="label">Theme</span>
         </button>
 
-        <div class="legend-trigger" aria-label="Status legend">
+        <div class="legend-trigger status-active" aria-label="Status legend">
           <span class="dot red" aria-hidden="true"></span>
           <span class="dot amber" aria-hidden="true"></span>
           <span class="dot green" aria-hidden="true"></span>
@@ -627,6 +839,44 @@
           <div class="cta-row">
             <a class="btn" href="#" aria-label="Email">Contact</a>
             <a class="btn secondary" href="#" aria-label="Work">Work</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="fieldnotes" aria-label="Field Notes">
+        <div class="fieldnotes-inner">
+          <div class="fieldnotes-head">
+            <div class="fieldnotes-title" aria-label="Field Notes title">
+              <img src="./assets/marks/field-notes.png" alt="FIELD NOTES" />
+            </div>
+            <div class="fieldnotes-meta">Newest first • Modular grid</div>
+          </div>
+
+          <!-- Feed placeholder: we will wire this to Notion (Option A) next. -->
+          <div class="feed" aria-label="Field Notes feed">
+            <article class="card l text" aria-label="Sample text post">
+              <div class="label">Text</div>
+              <div class="card-content">
+                <div class="quote">System online. Quiet progress beats loud motion.</div>
+                <div class="source">Field note • Draft</div>
+              </div>
+            </article>
+
+            <article class="card m" aria-label="Sample media post">
+              <div class="label">Media</div>
+              <div class="card-content" style="padding-top:46px;">
+                <div class="quote">Media placeholder (image/video) — will render when Notion wiring is live.</div>
+                <div class="source">Field note • Draft</div>
+              </div>
+            </article>
+
+            <article class="card s text" aria-label="Sample quote post">
+              <div class="label">Quote</div>
+              <div class="card-content">
+                <div class="quote">Clarity is a feature.</div>
+                <div class="source">Note • Draft</div>
+              </div>
+            </article>
           </div>
         </div>
       </section>
