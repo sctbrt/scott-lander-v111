@@ -14,55 +14,17 @@
 </head>
 <body>
 
-  <!-- PRELUDE / BOOT SEQUENCE -->
-  <div id="prelude" aria-hidden="false">
-    <div class="prelude-inner">
+  <!-- MORPHING HEADER -->
+  <header class="morph-header" id="morphHeader">
+    <div class="morph-inner">
       
-      <!-- Indicators (vertical pills) -->
-      <div class="indicator-pills" aria-hidden="true">
+      <div class="indicator-pills">
         <span class="pill red"></span>
         <span class="pill amber"></span>
         <span class="pill green"></span>
       </div>
 
-      <!-- Speaker Grille Mark -->
-      <div class="speaker-grille">
-        <img
-          src="./assets/scott-visual-black.png"
-          data-src-light="./assets/scott-visual-black.png"
-          data-src-dark="./assets/scott-visual-white.png"
-          alt=""
-        />
-      </div>
-
-      <!-- Wordmark -->
-      <div class="brand-wordmark">
-        <img
-          src="./assets/scott-wordmark-black.png"
-          data-src-light="./assets/scott-wordmark-black.png"
-          data-src-dark="./assets/scott-wordmark-white.png"
-          alt="Scott Bertrand"
-        />
-      </div>
-
-    </div>
-  </div>
-
-  <!-- MAIN SITE (SYSTEM INTERFACE) -->
-  <div class="site-shell" id="mainSite">
-    
-    <!-- Centered Brand Header -->
-    <header class="brand-header">
-      
-      <!-- Indicators (vertical pills) -->
-      <div class="indicator-pills" aria-hidden="true">
-        <span class="pill red"></span>
-        <span class="pill amber"></span>
-        <span class="pill green"></span>
-      </div>
-
-      <!-- Speaker Grille (clickable - reloads) -->
-      <button class="speaker-grille" aria-label="Reload" id="brandRefresh">
+      <button class="speaker-grille" id="grilleBtn" aria-label="Scroll to top">
         <img
           src="./assets/scott-visual-black.png"
           data-src-light="./assets/scott-visual-black.png"
@@ -71,7 +33,6 @@
         />
       </button>
 
-      <!-- Wordmark -->
       <div class="brand-wordmark">
         <img
           src="./assets/scott-wordmark-black.png"
@@ -81,15 +42,17 @@
         />
       </div>
 
-      <!-- Simple Nav -->
-      <nav class="simple-nav">
-        <button class="nav-btn" id="themeToggle" aria-label="Toggle theme">Theme</button>
+      <nav class="morph-nav">
+        <button class="nav-btn" id="themeToggle">Theme</button>
         <a class="nav-btn" href="#field-notes">Field Notes</a>
       </nav>
 
-    </header>
+    </div>
+  </header>
 
-    <!-- Main Content (Optional - can be minimal) -->
+  <!-- MAIN SITE -->
+  <div class="site-shell" id="mainSite">
+    
     <main class="main-content">
       <div class="statement">
         <p>I work across operations and brand systems to reduce friction where performance slips quietly — at the counter, in handoffs, and in the routines teams rely on.</p>
@@ -99,16 +62,16 @@
 
   </div>
 
-  <!-- FIELD NOTES (SKY MICROBRAND) -->
+  <!-- FIELD NOTES -->
   <div class="field-notes-shell" id="fieldNotes" hidden>
     
     <header class="fn-header">
-      <button class="fn-mark-btn" id="fnRefresh" aria-label="Refresh Field Notes">
+      <button class="fn-mark-btn" id="fnHome">
         <img src="./assets/marks/field-notes.png" alt="Field Notes" class="fn-mark" />
       </button>
       
       <div class="fn-controls">
-        <button class="fn-btn" id="viewToggle" aria-label="Toggle view">
+        <button class="fn-btn" id="viewToggle">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-grid">
             <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
             <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
@@ -122,37 +85,37 @@
           </svg>
           <span class="fn-label">Grid</span>
         </button>
-        <button class="fn-btn" id="fnClose" aria-label="Return to main">Close</button>
+        <button class="fn-btn" id="fnClose">Close</button>
       </div>
     </header>
 
     <div class="fn-feed" id="fnFeed">
-      <div class="fn-empty" id="fnEmpty">Loading…</div>
+      <div class="fn-empty">Loading…</div>
     </div>
 
   </div>
 
   <!-- MODAL (Desktop) -->
-  <div id="modal" class="modal-overlay" aria-hidden="true">
+  <div id="modal" class="modal-overlay">
     <div class="modal-backdrop"></div>
     <div class="modal-card">
-      <button class="modal-close" aria-label="Close">×</button>
+      <button class="modal-close">×</button>
       <div class="modal-body" id="modalBody"></div>
       <div class="modal-actions">
-        <a id="modalLink" href="#" target="_blank" rel="noopener">Open original →</a>
+        <a id="modalLink" href="#" target="_blank">Open original →</a>
       </div>
     </div>
   </div>
 
   <!-- BOTTOM SHEET (Mobile) -->
-  <div id="sheet" class="bottom-sheet" aria-hidden="true">
+  <div id="sheet" class="bottom-sheet">
     <div class="sheet-backdrop"></div>
     <div class="sheet-card">
       <div class="sheet-handle"></div>
-      <button class="sheet-close" aria-label="Close">Close</button>
+      <button class="sheet-close">Close</button>
       <div class="sheet-body" id="sheetBody"></div>
       <div class="sheet-actions">
-        <a id="sheetLink" href="#" target="_blank" rel="noopener" class="sheet-btn">Open original →</a>
+        <a id="sheetLink" href="#" target="_blank" class="sheet-btn">Open original →</a>
       </div>
     </div>
   </div>

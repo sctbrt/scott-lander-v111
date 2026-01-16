@@ -6,66 +6,78 @@
   const root = document.documentElement;
   const isMobile = () => window.innerWidth < 768;
 
-  let systemState = 'offline';
+  let systemState = 'ready';
 
   const setState = (state) => {
     systemState = state;
     root.setAttribute('data-state', state);
-    updateAllIndicators();
+    updateIndicators();
   };
 
-  const updateAllIndicators = () => {
-    $$('.indicator-pills').forEach(group => {
-      const red = $('.pill.red', group);
-      const amber = $('.pill.amber', group);
-      const green = $('.pill.green', group);
-      if (!red || !amber || !green) return;
-
-      [red, amber, green].forEach(p => p.className = p.className.replace(/ state-\w+/g, ''));
-
-      if (systemState === 'offline') {
-        red.classList.add('state-off');
-        amber.classList.add('state-off');
-        green.classList.add('state-off');
-      } else if (systemState === 'active') {
-        red.classList.add('state-dim');
-        amber.classList.add('state-active');
-        green.classList.add('state-dim');
-      } else if (systemState === 'ready') {
-        red.classList.add('state-dim');
-        amber.classList.add('state-dim');
-        green.classList.add('state-ready');
-      }
+  const updateIndicators = () => {
+    $$('.pill').forEach(p => {
+      p.className = p.className.replace(/ state-\w+/g, '');
     });
+
+    const pills = {
+      red: $$('.pill.red'),
+      amber: $$('.pill.amber'),
+      green: $$('.pill.green')
+    };
+
+    if (systemState === 'active') {
+      pills.red.forEach(p => p.classList.add('state-dim'));
+      pills.amber.forEach(p => p.classList.add('state-active'));
+      pills.green.forEach(p => p.classList.add('state-dim'));
+    } else if (systemState === 'ready') {
+      pills.red.forEach(p => p.classList.add('state-dim'));
+      pills.amber.forEach(p => p.classList.add('state-dim'));
+      pills.green.forEach(p => p.classList.add('state-ready'));
+    } else {
+      pills.red.forEach(p => p.classList.add('state-off'));
+      pills.amber.forEach(p => p.classList.add('state-off'));
+      pills.green.forEach(p => p.classList.add('state-off'));
+    }
   };
 
   /* THEME */
   const THEME_KEY = "sb_theme";
 
-  const getStoredTheme = () => {
-    try { return localStorage.getItem(THEME_KEY); } catch { return null; }
+  const getTheme = () => {
+    try {
+      return localStorage.getItem(THEME_KEY);
+    } catch {
+      return null;
+    }
   };
 
   const saveTheme = (t) => {
-    try { localStorage.setItem(THEME_KEY, t); } catch {}
+    try {
+      localStorage.setItem(THEME_KEY, t);
+    } catch {}
   };
 
-  const getTimeBasedTheme = () => {
+  const getTimeTheme = () => {
     try {
       const h = new Date().getHours();
       return (h >= 9 && h < 18) ? "light" : "dark";
     } catch {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
+      return "light";
     }
   };
 
   const swapAssets = (theme) => {
     $$("img[data-src-light][data-src-dark]").forEach(img => {
-      img.src = theme === "dark" ? img.getAttribute("data-src-dark") : img.getAttribute("data-src-light");
+      img.src = theme === "dark" 
+        ? img.getAttribute("data-src-dark") 
+        : img.getAttribute("data-src-light");
     });
+
     const fnMark = $(".fn-mark");
     if (fnMark) {
-      fnMark.src = theme === "dark" ? "./assets/marks/field-notes-white.png" : "./assets/marks/field-notes.png";
+      fnMark.src = theme === "dark" 
+        ? "./assets/marks/field-notes-white.png" 
+        : "./assets/marks/field-notes.png";
     }
   };
 
@@ -75,8 +87,8 @@
   };
 
   const initTheme = () => {
-    const stored = getStoredTheme();
-    const initial = stored || getTimeBasedTheme();
+    const stored = getTheme();
+    const initial = stored || getTimeTheme();
     applyTheme(initial);
 
     const toggle = $("#themeToggle");
@@ -90,93 +102,47 @@
     }
   };
 
-  /* PRELUDE - ENFORCED 3.2s */
-  const initPrelude = () => {
-    const prelude = $("#prelude");
-    if (!prelude) {
-      setState('ready');
-      return;
-    }
+  /* MORPHING HEADER */
+  const initMorphHeader = () => {
+    const header = $("#morphHeader");
+    if (!header) return;
 
-    try {
-      if (sessionStorage.getItem("sb_booted") === "1") {
-        prelude.remove();
-        setState('ready');
-        return;
-      }
-      sessionStorage.setItem("sb_booted", "1");
-    } catch {}
+    let ticking = false;
+    let lastScroll = 0;
 
-    const setPhase = (p) => prelude.setAttribute("data-phase", p);
+    const updateHeader = () => {
+      const scroll = window.pageYOffset || document.documentElement.scrollTop;
+      const threshold = 100;
+      const progress = Math.min(scroll / threshold, 1);
 
-    let started = false;
-    const startTime = Date.now();
-
-    const runSequence = () => {
-      if (started) return;
-      started = true;
-
-      // Phase 1: Presence (0-260ms)
-      setPhase('presence');
-      setState('offline');
-
-      setTimeout(() => {
-        // Phase 2: Active (260-2060ms)
-        setPhase('active');
-        setState('active');
-
-        setTimeout(() => {
-          // Phase 3: Ready (2060-2580ms)
-          setPhase('ready');
-          setState('ready');
-
-          setTimeout(() => {
-            // Phase 4: Reveal (2360-2880ms) - overlaps
-            setPhase('reveal');
-
-            setTimeout(() => {
-              // Phase 5: Exit (2880-3200ms)
-              setPhase('exit');
-
-              setTimeout(() => {
-                prelude.remove();
-              }, 320);
-
-            }, 520);
-          }, 300);
-        }, 1800);
-      }, 260);
-    };
-
-    // ENFORCE 3.2s minimum - wait until both load complete AND 2060ms elapsed
-    const minWait = 2060;
-    let loadComplete = false;
-
-    const checkStart = () => {
-      const elapsed = Date.now() - startTime;
-      if (loadComplete && elapsed >= minWait) {
-        runSequence();
+      if (progress > 0.01) {
+        header.classList.add('morphed');
+        header.style.setProperty('--morph-progress', progress);
       } else {
-        const remaining = Math.max(0, minWait - elapsed);
-        setTimeout(checkStart, remaining);
+        header.classList.remove('morphed');
+        header.style.setProperty('--morph-progress', 0);
+      }
+
+      lastScroll = scroll;
+      ticking = false;
+    };
+
+    const requestTick = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateHeader);
+        ticking = true;
       }
     };
 
-    if (document.readyState === "complete") {
-      loadComplete = true;
-      checkStart();
-    } else {
-      window.addEventListener("load", () => {
-        loadComplete = true;
-        checkStart();
-      }, { once: true });
+    window.addEventListener('scroll', requestTick, { passive: true });
+
+    const grilleBtn = $("#grilleBtn");
+    if (grilleBtn) {
+      grilleBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }
-
-    // Failsafe
-    setTimeout(runSequence, 5200);
   };
-
-  /* ROUTING */
   const applyRoute = () => {
     const hash = window.location.hash.toLowerCase();
     const showFN = hash === "#field-notes";
@@ -187,42 +153,26 @@
     if (showFN) {
       if (main) main.hidden = true;
       if (fn) fn.hidden = false;
-      document.body.classList.add('route-fn');
     } else {
       if (main) main.hidden = false;
       if (fn) fn.hidden = true;
-      document.body.classList.remove('route-fn');
     }
   };
 
   const initRouting = () => {
     window.addEventListener("hashchange", applyRoute);
     applyRoute();
-  };
 
-  /* BRAND REFRESH */
-  const initBrandRefresh = () => {
-    const btn = $("#brandRefresh");
-    if (btn) {
-      btn.addEventListener("click", () => {
+    const fnHome = $("#fnHome");
+    if (fnHome) {
+      fnHome.addEventListener("click", () => {
         window.location.hash = "";
-        window.scrollTo(0, 0);
-      });
-    }
-  };
-
-  /* FN REFRESH */
-  const initFNRefresh = () => {
-    const btn = $("#fnRefresh");
-    if (btn) {
-      btn.addEventListener("click", () => {
-        loadFieldNotes();
       });
     }
 
-    const close = $("#fnClose");
-    if (close) {
-      close.addEventListener("click", () => {
+    const fnClose = $("#fnClose");
+    if (fnClose) {
+      fnClose.addEventListener("click", () => {
         window.location.hash = "";
       });
     }
@@ -230,6 +180,7 @@
 
   /* VIEW TOGGLE */
   const VIEW_KEY = "sb_view";
+
   const initViewToggle = () => {
     const toggle = $("#viewToggle");
     const feed = $("#fnFeed");
@@ -240,7 +191,9 @@
     const label = $(".fn-label", toggle);
 
     let view = "grid";
-    try { view = localStorage.getItem(VIEW_KEY) || "grid"; } catch {}
+    try {
+      view = localStorage.getItem(VIEW_KEY) || "grid";
+    } catch {}
 
     const apply = (v) => {
       view = v;
@@ -255,25 +208,36 @@
         if (iconList) iconList.style.display = "none";
         if (label) label.textContent = "Grid";
       }
-      try { localStorage.setItem(VIEW_KEY, v); } catch {}
+      try {
+        localStorage.setItem(VIEW_KEY, v);
+      } catch {}
     };
 
     apply(view);
     toggle.addEventListener("click", () => apply(view === "grid" ? "list" : "grid"));
   };
 
-  /* FIELD NOTES LOADER */
+  /* FIELD NOTES */
   const API_ID = "2ea3c4a766e480b7a46ed6bb8d6cde82";
   const API_URL = `https://notion-api.splitbee.io/v1/table/${API_ID}`;
 
-  const esc = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  const esc = (s) => String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
   const fmtDate = (v) => {
     if (!v) return "";
     try {
       const d = new Date(v);
       if (isNaN(d)) return String(v);
-      return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+      return d.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      });
     } catch {
       return String(v);
     }
@@ -401,19 +365,21 @@
       link.style.display = "none";
     }
 
-    modal.setAttribute("aria-hidden", "false");
     modal.classList.add("is-open");
     document.body.style.overflow = 'hidden';
 
     const closeModal = () => {
-      modal.setAttribute("aria-hidden", "true");
       modal.classList.remove("is-open");
       document.body.style.overflow = '';
     };
 
     close.onclick = closeModal;
-    modal.onclick = (e) => { if (e.target.classList.contains('modal-backdrop')) closeModal(); };
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); }, { once: true });
+    modal.onclick = (e) => {
+      if (e.target.classList.contains('modal-backdrop')) closeModal();
+    };
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    }, { once: true });
   };
 
   const openSheet = ({ title, type, date, excerpt, url }) => {
@@ -438,28 +404,26 @@
       link.style.display = "none";
     }
 
-    sheet.setAttribute("aria-hidden", "false");
     sheet.classList.add("is-open");
     document.body.style.overflow = 'hidden';
 
     const closeSheet = () => {
-      sheet.setAttribute("aria-hidden", "true");
       sheet.classList.remove("is-open");
       document.body.style.overflow = '';
     };
 
     close.onclick = closeSheet;
-    sheet.onclick = (e) => { if (e.target.classList.contains('sheet-backdrop')) closeSheet(); };
+    sheet.onclick = (e) => {
+      if (e.target.classList.contains('sheet-backdrop')) closeSheet();
+    };
   };
 
   async function loadFieldNotes() {
     const feed = $("#fnFeed");
-    const empty = $("#fnEmpty");
-    if (!feed || !empty) return;
+    if (!feed) return;
 
     try {
       setState('active');
-      empty.textContent = "Loading…";
 
       const res = await fetch(API_URL, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -506,11 +470,10 @@
   /* INIT */
   const init = () => {
     initTheme();
+    initMorphHeader();
     initRouting();
-    initBrandRefresh();
-    initFNRefresh();
     initViewToggle();
-    initPrelude();
+    setState('ready');
     loadFieldNotes();
   };
 
