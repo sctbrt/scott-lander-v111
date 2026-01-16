@@ -1014,7 +1014,7 @@
         if (!hasMedia) {
           return `
             <article class="card ${size} text" aria-label="Field note">
-              <a class="card-link" href="#" data-notion-url="${escapeHtml(url)}" aria-label="Open in Notion">
+              <a class="card-link" href="#" role="button" aria-haspopup="dialog" data-notion-url="${escapeHtml(url)}" aria-label="Open field note">
                 <div class="label">${escapeHtml(type)}</div>
                 <div class="card-content">
                   <div class="quote">${escapeHtml(excerpt || title)}</div>
@@ -1036,7 +1036,7 @@
 
         return `
           <article class="card ${size} media" aria-label="Field note media">
-            <a class="card-link" href="#" data-notion-url="${escapeHtml(url)}" aria-label="Open in Notion">
+            <a class="card-link" href="#" role="button" aria-haspopup="dialog" data-notion-url="${escapeHtml(url)}" aria-label="Open field note">
               ${mediaEl}
               <div class="scrim" aria-hidden="true"></div>
               <div class="card-content" style="position:absolute; inset:auto 0 0 0; padding:14px; padding-bottom:34px;">
@@ -1204,48 +1204,65 @@
 
       // ----------------------------
       // Field Notes modal handling
+      // (Keeps everything on-site; no navigation to Notion on card click.)
       // ----------------------------
       const modal = document.getElementById('fnModal');
       const modalContent = document.getElementById('fnModalContent');
       const modalClose = document.getElementById('fnClose');
       const modalOriginal = document.getElementById('fnOriginal');
 
+      const closeModal = () => {
+        if (!modal || !modalContent) return;
+        modal.style.display = 'none';
+        modalContent.innerHTML = '';
+      };
+
+      // If modal elements aren't present for any reason, don't break the feed.
+      const modalReady = Boolean(modal && modalContent && modalClose && modalOriginal);
+
       document.addEventListener('click', (e) => {
         const link = e.target.closest('.card-link');
         if (!link) return;
 
+        // Prevent ANY navigation (including any unexpected default from nested elements)
         e.preventDefault();
+        e.stopPropagation();
+
+        if (!modalReady) return;
 
         const notionUrl = link.getAttribute('data-notion-url');
         if (!notionUrl) return;
 
-        modalContent.innerHTML = link.closest('.card').innerHTML;
-        modalOriginal.href = notionUrl.replace('https://notion.so', 'https://lilac-stocking-b2d.notion.site');
+        const card = link.closest('.card');
+        if (!card) return;
+
+        // Clone card content into the modal
+        modalContent.innerHTML = card.innerHTML;
+
+        // Point to your Notion site for the original (only when user clicks OPEN ORIGINAL)
+        modalOriginal.href = notionUrl
+          .replace('https://notion.so', 'https://lilac-stocking-b2d.notion.site')
+          .replace('https://www.notion.so', 'https://lilac-stocking-b2d.notion.site');
 
         modal.style.display = 'block';
-      });
+      }, { capture: true });
 
-      modalClose.addEventListener('click', () => {
-        modal.style.display = 'none';
-        modalContent.innerHTML = '';
-      });
+      if (modalReady) {
+        modalClose.addEventListener('click', (e) => {
+          e.preventDefault();
+          closeModal();
+        });
 
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.style.display = 'none';
-          modalContent.innerHTML = '';
-        }
-      });
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeModal();
+        });
 
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          modal.style.display = 'none';
-          modalContent.innerHTML = '';
-        }
-      });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') closeModal();
+        });
+      }
     })();
   </script>
-</body>
   <!-- Field Notes Modal -->
   <div id="fnModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.65); backdrop-filter:blur(12px);">
     <div id="fnModalCard" style="
@@ -1280,4 +1297,5 @@
       </div>
     </div>
   </div>
+</body>
 </html>
