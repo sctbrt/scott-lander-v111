@@ -102,7 +102,7 @@
       <nav class="desktop-nav" role="navigation" aria-label="Main navigation">
         <button class="nav-link" data-route="about">About</button>
         <button class="nav-link" data-route="philosophy">Philosophy</button>
-        <a class="nav-link" href="field-notes.html" target="_blank" rel="noopener">Field Notes</a>
+        <button class="nav-link" data-route="fieldnotes">Field Notes</button>
         <a class="nav-link" href="mailto:bertrandbrands@outlook.com">Contact</a>
         <button class="nav-link theme-btn" id="themeToggle" aria-label="Toggle theme">
           <span class="theme-icon">☀️</span>
@@ -129,7 +129,7 @@
       <nav class="mobile-menu-nav" role="navigation">
         <button class="mobile-nav-link" data-route="about">About</button>
         <button class="mobile-nav-link" data-route="philosophy">Philosophy</button>
-        <a class="mobile-nav-link" href="field-notes.html" target="_blank" rel="noopener">Field Notes</a>
+        <button class="mobile-nav-link" data-route="fieldnotes">Field Notes</button>
         <a class="mobile-nav-link" href="mailto:bertrandbrands@outlook.com">Contact</a>
         <div class="mobile-nav-divider"></div>
         <button class="mobile-nav-link mobile-theme-btn" id="mobileThemeToggle">
@@ -171,17 +171,42 @@
         </div>
       </section>
 
-      <!-- Latest Field Note -->
-      <section class="latest-note" id="latestNote" aria-labelledby="latest-note-title">
-        <div class="section-header">
-          <h2 id="latest-note-title" class="section-title">Latest Field Note</h2>
-          <a class="view-all-btn" href="field-notes.html" target="_blank" rel="noopener">View all →</a>
+      <!-- Field Notes Section -->
+      <section class="field-notes-section" id="fieldNotesSection" aria-labelledby="field-notes-title">
+        <div class="fn-intro">
+          <h2 id="field-notes-title" class="section-title">Field Notes</h2>
+          <p class="fn-description">Fragments, observations, and working material collected over time.</p>
         </div>
-        <div class="latest-note-card" id="latestNoteCard">
-          <div class="loading-card">
-            <div class="loading-spinner"></div>
-            <p>Loading latest note…</p>
+
+        <div class="fn-controls">
+          <div class="fn-filters">
+            <select id="typeFilter" class="fn-filter" aria-label="Filter by type">
+              <option value="all">All Types</option>
+            </select>
+            <select id="dateFilter" class="fn-filter" aria-label="Filter by date">
+              <option value="all">All Time</option>
+              <option value="month">Past Month</option>
+              <option value="quarter">Past Quarter</option>
+              <option value="year">Past Year</option>
+            </select>
           </div>
+          <button class="fn-view-toggle" id="viewToggle" aria-label="Toggle view">
+            <span class="fn-label">Grid</span>
+          </button>
+        </div>
+
+        <div class="fn-feed" id="fnFeed">
+          <div class="fn-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading notes…</p>
+          </div>
+        </div>
+
+        <div class="fn-load-more" id="loadMoreContainer" hidden>
+          <button class="fn-load-btn" id="loadMoreBtn">
+            <span id="itemsShown"></span>
+            <span>Load more</span>
+          </button>
         </div>
       </section>
 

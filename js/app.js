@@ -161,6 +161,7 @@
   const navigate = (route) => {
     const about = $("#aboutSection");
     const philosophy = $("#philosophySection");
+    const fieldnotes = $("#fieldNotesSection");
 
     if (route === "about") {
       if (about) {
@@ -169,6 +170,10 @@
     } else if (route === "philosophy") {
       if (philosophy) {
         philosophy.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else if (route === "fieldnotes") {
+      if (fieldnotes) {
+        fieldnotes.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -571,25 +576,42 @@
     }
   }
 
-  async function loadLatestNote() {
-    const container = $("#latestNoteCard");
-    if (!container) return;
+  async function loadFieldNotes() {
+    const feed = $("#fnFeed");
+    if (!feed) return;
 
     try {
       const notes = await fetchFieldNotes();
-      
+
       if (!notes.length) {
-        container.innerHTML = `<div class="error-state">No notes published yet.</div>`;
+        feed.innerHTML = `<div class="fn-empty">No Field Notes available.</div>`;
         return;
       }
 
-      const latest = notes[0];
-      container.innerHTML = renderCard(latest, 0, true);
-      attachCardListeners(container);
+      // Populate type filter
+      const types = new Set();
+      notes.forEach(n => {
+        const type = n?.Type || "Note";
+        types.add(type);
+      });
+
+      const typeFilter = $("#typeFilter");
+      if (typeFilter) {
+        types.forEach(type => {
+          const opt = document.createElement("option");
+          opt.value = type;
+          opt.textContent = type;
+          typeFilter.appendChild(opt);
+        });
+      }
+
+      applyFilters();
 
     } catch (err) {
-      console.error("Latest note error:", err);
-      container.innerHTML = `<div class="error-state">Could not load latest note.</div>`;
+      console.error("Field Notes error:", err);
+      if (feed) {
+        feed.innerHTML = `<div class="fn-empty">Could not load Field Notes.</div>`;
+      }
     }
   }
 
@@ -761,6 +783,30 @@
     }, 1800);
   };
 
+  /* FIELD NOTES CONTROLS */
+  const initFieldNotesControls = () => {
+    const typeFilter = $("#typeFilter");
+    const dateFilter = $("#dateFilter");
+    const loadMoreBtn = $("#loadMoreBtn");
+
+    if (typeFilter) {
+      typeFilter.addEventListener("change", applyFilters);
+    }
+
+    if (dateFilter) {
+      dateFilter.addEventListener("change", applyFilters);
+    }
+
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", () => {
+        displayedCount += ITEMS_PER_PAGE;
+        renderFeed();
+      });
+    }
+
+    initViewToggle();
+  };
+
   /* INIT */
   const init = () => {
     initTheme();
@@ -769,8 +815,9 @@
     initMorphHeader();
     initScrollTransforms();
     initRouting();
+    initFieldNotesControls();
     setState('ready');
-    loadLatestNote();
+    loadFieldNotes();
   };
 
   if (document.readyState === "loading") {
