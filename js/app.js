@@ -135,37 +135,10 @@
     const header = $("#morphHeader");
     if (!header) return;
 
-    let ticking = false;
-
-    const updateHeader = () => {
-      const scroll = window.pageYOffset || document.documentElement.scrollTop;
-      const threshold = 100;
-      const progress = Math.min(scroll / threshold, 1);
-
-      if (progress > 0.01) {
-        header.classList.add('morphed');
-        document.body.classList.add('header-morphed');
-        header.style.setProperty('--morph-progress', progress);
-      } else {
-        header.classList.remove('morphed');
-        document.body.classList.remove('header-morphed');
-        header.style.setProperty('--morph-progress', 0);
-      }
-
-      ticking = false;
-    };
-
-    const requestTick = () => {
-      if (!ticking) {
-        requestAnimationFrame(updateHeader);
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', requestTick, { passive: true });
-
-    // Set initial state
-    updateHeader();
+    // Header stays in compact morphed state permanently
+    header.classList.add('morphed');
+    document.body.classList.add('header-morphed');
+    header.style.setProperty('--morph-progress', 1);
 
     const grilleBtn = $("#grilleBtn");
     const wordmark = $(".brand-wordmark");
