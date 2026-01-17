@@ -476,9 +476,7 @@ button {
   pointer-events: auto;
 }
 
-.morph-header:not(.morphed) .mobile-menu-btn {
-  pointer-events: none;
-}
+/* Mobile menu button always clickable since header is always morphed */
 
 .mobile-menu-btn:hover {
   background: var(--glass);
