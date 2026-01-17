@@ -438,6 +438,13 @@ button {
   transform: translateY(-1px);
 }
 
+.nav-link[href="field-notes.html"] {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .theme-btn {
   padding: 10px 12px;
   min-width: 44px;
@@ -567,6 +574,13 @@ button {
 
 .mobile-nav-link:hover {
   background: var(--surface);
+}
+
+.mobile-nav-link[href="field-notes.html"] {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .mobile-nav-divider {
@@ -760,8 +774,13 @@ body.header-morphed .field-notes-shell {
   -webkit-backdrop-filter: blur(10px);
   color: var(--text);
   font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
   transition: background 160ms ease, transform 160ms ease;
 }
 
