@@ -1532,8 +1532,18 @@ body.header-morphed .field-notes-shell {
     font-size: 19px;
   }
 
-  .about-content p {
+  .about-content p,
+  .philosophy-content p {
     font-size: 16px;
+  }
+
+  .about-section.in-view .about-content p,
+  .philosophy-section.in-view .philosophy-content p {
+    font-size: 17px;
+  }
+
+  .philosophy-section.in-view .philosophy-content p:last-child {
+    font-size: 18px;
   }
 
   .fn-hero {
@@ -1605,8 +1615,14 @@ body.header-morphed .field-notes-shell {
     font-size: 18px;
   }
 
-  .about-section {
+  .about-section,
+  .philosophy-section {
     padding: 60px 20px;
+  }
+
+  .about-section.in-view,
+  .philosophy-section.in-view {
+    padding: 80px 20px;
   }
 
   .fn-feed {
