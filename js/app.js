@@ -144,9 +144,11 @@
 
       if (progress > 0.01) {
         header.classList.add('morphed');
+        document.body.classList.add('header-morphed');
         header.style.setProperty('--morph-progress', progress);
       } else {
         header.classList.remove('morphed');
+        document.body.classList.remove('header-morphed');
         header.style.setProperty('--morph-progress', 0);
       }
 

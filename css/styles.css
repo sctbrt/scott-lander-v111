@@ -485,6 +485,12 @@ button {
   z-index: 1;
   display: flex;
   flex-direction: column;
+  transition: padding-top 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.header-morphed .site-shell,
+body.header-morphed .field-notes-shell {
+  padding-top: 80px;
 }
 
 .main-content {
@@ -627,7 +633,7 @@ button {
 /* FIELD NOTES PAGE */
 .field-notes-shell {
   min-height: 100vh;
-  padding: 120px 24px 0;
+  padding: 120px 32px 0;
   position: relative;
   z-index: 1;
   display: flex;
@@ -663,8 +669,8 @@ button {
 
 /* Controls Bar */
 .fn-controls-bar {
-  max-width: 1100px;
-  margin: 0 auto 32px;
+  max-width: 1240px;
+  margin: 0 auto 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -723,17 +729,19 @@ button {
 
 /* Feed */
 .fn-feed {
-  max-width: 1100px;
+  max-width: 1240px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 18px;
+  gap: 24px;
   flex: 1;
+  padding-bottom: 60px;
 }
 
 .fn-feed.list-view {
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: 16px;
+  max-width: 900px;
 }
 
 .fn-empty {
@@ -763,9 +771,9 @@ button {
   box-shadow: 0 18px 50px rgba(0,0,0,0.20);
 }
 
-.fn-card.s { grid-column: span 4; min-height: 200px; }
-.fn-card.m { grid-column: span 6; min-height: 260px; }
-.fn-card.l { grid-column: span 8; min-height: 340px; }
+.fn-card.s { grid-column: span 4; min-height: 240px; }
+.fn-card.m { grid-column: span 6; min-height: 300px; }
+.fn-card.l { grid-column: span 8; min-height: 380px; }
 
 .fn-card-btn {
   width: 100%;
@@ -1330,6 +1338,11 @@ button {
   .site-shell,
   .field-notes-shell {
     padding-top: 100vh;
+  }
+
+  body.header-morphed .site-shell,
+  body.header-morphed .field-notes-shell {
+    padding-top: 64px;
   }
 
   .speaker-grille {
