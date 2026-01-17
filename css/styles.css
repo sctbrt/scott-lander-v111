@@ -1,6 +1,5 @@
 /* =========================================================
-   SCOTT BERTRAND — Unified Sky System
-   Day: Blue sky / Night: Starry night sky
+   SCOTT BERTRAND — Complete Polished System
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
@@ -37,6 +36,13 @@ img {
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+/* Focus states for accessibility */
+*:focus-visible {
+  outline: 3px solid var(--ind-amber);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* ========================================
@@ -246,10 +252,10 @@ button {
   display: none;
 }
 
-/* Speaker Grille - Smooth morph */
+/* Speaker Grille */
 .morph-header .speaker-grille {
-  width: calc(500px - (420px * var(--morph-progress)));
-  height: calc(500px - (420px * var(--morph-progress)));
+  width: calc(360px - (280px * var(--morph-progress)));
+  height: calc(360px - (280px * var(--morph-progress)));
   border-radius: 50%;
   border: 2px solid var(--stroke);
   background: var(--surface);
@@ -286,9 +292,9 @@ button {
   transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Wordmark - Fades out on morph */
+/* Wordmark */
 .morph-header .brand-wordmark {
-  max-width: min(760px, 88vw);
+  max-width: min(800px, 90vw);
   opacity: calc(1 - var(--morph-progress));
   transform: translateY(calc(var(--morph-progress) * 20px));
   transition: 
@@ -305,7 +311,7 @@ button {
   height: auto;
 }
 
-/* Nav - Slides in on morph */
+/* Nav */
 .morph-nav {
   opacity: calc(var(--morph-progress));
   transform: translateX(calc((1 - var(--morph-progress)) * 20px));
@@ -323,24 +329,33 @@ button {
 }
 
 .morph-nav .nav-btn {
-  padding: 10px 20px;
+  padding: 12px 22px;
+  min-height: 44px;
   border-radius: 999px;
   border: 1px solid var(--stroke);
   background: var(--surface);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: var(--text);
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
   transition: background 180ms ease, transform 180ms ease;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .morph-nav .nav-btn:hover {
   background: var(--glass);
   transform: translateY(-1px);
+}
+
+.theme-icon {
+  font-size: 16px;
+  line-height: 1;
 }
 
 /* ========================================
@@ -356,7 +371,7 @@ button {
 
 /* Statement */
 .main-content {
-  max-width: 680px;
+  max-width: 760px;
   margin: 0 auto;
 }
 
@@ -365,29 +380,33 @@ button {
   display: grid;
   gap: 36px;
   justify-items: center;
+  margin-bottom: 80px;
 }
 
 .statement p {
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.65;
   color: var(--text-muted);
-  max-width: 560px;
+  max-width: 600px;
 }
 
 .contact-btn {
-  padding: 14px 30px;
+  padding: 15px 32px;
+  min-height: 48px;
   border-radius: 999px;
   border: 1px solid var(--stroke);
   background: var(--surface);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: var(--text);
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
   text-decoration: none;
   transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
   box-shadow: var(--shadow);
+  display: inline-flex;
+  align-items: center;
 }
 
 .contact-btn:hover {
@@ -398,6 +417,67 @@ button {
 
 .contact-btn:active {
   transform: translateY(0);
+}
+
+/* Latest Note Section */
+.latest-note {
+  margin: 80px auto;
+  max-width: 900px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.section-title {
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.view-all-btn {
+  padding: 10px 18px;
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.view-all-btn:hover {
+  background: var(--glass);
+  transform: translateY(-1px);
+}
+
+.latest-note-card {
+  min-height: 200px;
+}
+
+.loading-state,
+.error-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 15px;
+  border-radius: 20px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+}
+
+.error-state {
+  color: var(--ind-red);
 }
 
 /* ========================================
@@ -419,6 +499,7 @@ button {
   align-items: center;
   gap: 20px;
   flex-wrap: wrap;
+  padding-top: 80px;
 }
 
 .fn-mark-btn {
@@ -426,6 +507,7 @@ button {
   border: none;
   padding: 0;
   transition: opacity 160ms ease, transform 160ms ease;
+  min-height: 44px;
 }
 
 .fn-mark-btn:hover {
@@ -447,7 +529,8 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 18px;
+  padding: 12px 20px;
+  min-height: 44px;
   border-radius: 999px;
   border: 1px solid var(--stroke);
   background: var(--surface);
@@ -526,6 +609,7 @@ button {
   color: inherit;
   text-align: left;
   position: relative;
+  min-height: 180px;
 }
 
 /* Text Cards */
@@ -570,7 +654,7 @@ button {
 }
 
 .fn-source {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text-muted);
   letter-spacing: 0.01em;
@@ -660,7 +744,7 @@ button {
 }
 
 /* ========================================
-   MODALS
+   TEXT MODALS
    ======================================== */
 
 .modal-overlay {
@@ -714,8 +798,8 @@ button {
   position: absolute;
   top: 20px;
   right: 20px;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--stroke);
   background: var(--surface);
@@ -753,13 +837,13 @@ button {
 }
 
 .modal-date {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-muted);
   margin-bottom: 28px;
 }
 
 .modal-excerpt {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.65;
   color: var(--text);
   white-space: pre-wrap;
@@ -773,6 +857,8 @@ button {
 
 .modal-actions a {
   display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   padding: 13px 22px;
   border-radius: 999px;
   border: 1px solid var(--stroke);
@@ -789,7 +875,79 @@ button {
   background: var(--surface);
 }
 
-/* Bottom Sheet (Mobile) */
+/* ========================================
+   MEDIA LIGHTBOX
+   ======================================== */
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms ease;
+}
+
+.lightbox-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.90);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.20);
+  background: rgba(0,0,0,0.60);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  font-size: 28px;
+  line-height: 1;
+  z-index: 10;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.lightbox-close:hover {
+  background: rgba(0,0,0,0.80);
+  transform: scale(1.05);
+}
+
+.lightbox-content {
+  position: relative;
+  z-index: 1;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: grid;
+  place-items: center;
+}
+
+.lightbox-media {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.60);
+}
+
+/* ========================================
+   BOTTOM SHEET (Mobile)
+   ======================================== */
+
 .bottom-sheet {
   position: fixed;
   inset: 0;
@@ -848,7 +1006,8 @@ button {
   position: absolute;
   top: 18px;
   right: 18px;
-  padding: 9px 16px;
+  padding: 10px 18px;
+  min-height: 44px;
   border-radius: 999px;
   border: 1px solid var(--stroke);
   background: var(--surface);
@@ -864,7 +1023,7 @@ button {
 }
 
 .sheet-body {
-  padding: 44px 26px 26px;
+  padding: 50px 26px 26px;
   overflow-y: auto;
 }
 
@@ -878,6 +1037,8 @@ button {
   display: flex;
   width: 100%;
   justify-content: center;
+  min-height: 48px;
+  align-items: center;
   padding: 15px 22px;
   border-radius: 999px;
   border: 1px solid var(--stroke);
@@ -908,8 +1069,8 @@ button {
   }
 
   .morph-header .speaker-grille {
-    width: calc(380px - (300px * var(--morph-progress)));
-    height: calc(380px - (300px * var(--morph-progress)));
+    width: calc(280px - (220px * var(--morph-progress)));
+    height: calc(280px - (220px * var(--morph-progress)));
   }
 
   .morph-header.morphed .morph-inner {
@@ -920,6 +1081,19 @@ button {
   .morph-nav {
     grid-column: 1 / -1;
     justify-self: center;
+  }
+
+  .statement p {
+    font-size: 16px;
+  }
+
+  .latest-note {
+    margin: 60px auto;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .fn-feed {
@@ -941,6 +1115,13 @@ button {
   .fn-feed.list-view .fn-card.media .fn-media {
     width: 160px;
   }
+
+  .lightbox-close {
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+  }
 }
 
 @media (max-width: 520px) {
@@ -949,8 +1130,8 @@ button {
   }
 
   .morph-header .speaker-grille {
-    width: calc(320px - (260px * var(--morph-progress)));
-    height: calc(320px - (260px * var(--morph-progress)));
+    width: calc(240px - (180px * var(--morph-progress)));
+    height: calc(240px - (180px * var(--morph-progress)));
   }
 
   .morph-header.morphed {
@@ -958,8 +1139,20 @@ button {
   }
 
   .morph-nav .nav-btn {
-    padding: 9px 16px;
+    padding: 10px 16px;
     font-size: 11px;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .statement {
+    margin-bottom: 60px;
+  }
+
+  .statement p {
+    font-size: 15px;
   }
 
   .fn-header {
@@ -990,6 +1183,11 @@ button {
 
   .fn-btn .fn-label {
     display: none;
+  }
+
+  .lightbox-close {
+    top: 16px;
+    right: 16px;
   }
 }
 

@@ -15,21 +15,21 @@
 <body>
 
   <!-- MORPHING HEADER -->
-  <header class="morph-header" id="morphHeader">
+  <header class="morph-header" id="morphHeader" role="banner">
     <div class="morph-inner">
       
-      <div class="indicator-pills">
-        <span class="pill red"></span>
-        <span class="pill amber"></span>
-        <span class="pill green"></span>
+      <div class="indicator-pills" role="status" aria-label="System status">
+        <span class="pill red" aria-label="Offline indicator"></span>
+        <span class="pill amber" aria-label="Active indicator"></span>
+        <span class="pill green" aria-label="Ready indicator"></span>
       </div>
 
-      <button class="speaker-grille" id="grilleBtn" aria-label="Scroll to top">
+      <button class="speaker-grille" id="grilleBtn" aria-label="Return to top">
         <img
           src="./assets/scott-visual-black.png"
           data-src-light="./assets/scott-visual-black.png"
           data-src-dark="./assets/scott-visual-white.png"
-          alt=""
+          alt="Scott Bertrand visual mark"
         />
       </button>
 
@@ -42,80 +42,104 @@
         />
       </div>
 
-      <nav class="morph-nav">
-        <button class="nav-btn" id="themeToggle">Theme</button>
-        <a class="nav-btn" href="#field-notes">Field Notes</a>
+      <nav class="morph-nav" role="navigation" aria-label="Main navigation">
+        <button class="nav-btn" id="themeToggle" aria-label="Toggle light and dark theme">
+          <span class="theme-icon">☀️</span>
+          <span class="nav-label">Theme</span>
+        </button>
+        <button class="nav-btn" data-route="field-notes" aria-label="View Field Notes">
+          <span class="nav-label">Field Notes</span>
+        </button>
       </nav>
 
     </div>
   </header>
 
   <!-- MAIN SITE -->
-  <div class="site-shell" id="mainSite">
+  <div class="site-shell" id="mainSite" data-page="home">
     
-    <main class="main-content">
-      <div class="statement">
-        <p>I work across operations and brand systems to reduce friction where performance slips quietly — at the counter, in handoffs, and in the routines teams rely on.</p>
+    <main class="main-content" role="main">
+      
+      <section class="statement" aria-labelledby="statement-text">
+        <p id="statement-text">I work across operations and brand systems to reduce friction where performance slips quietly — at the counter, in handoffs, and in the routines teams rely on.</p>
         <a href="mailto:hello@scottbertrand.com" class="contact-btn">Contact</a>
-      </div>
+      </section>
+
+      <section class="latest-note" id="latestNote" aria-labelledby="latest-note-title">
+        <div class="section-header">
+          <h2 id="latest-note-title" class="section-title">Latest Field Note</h2>
+          <button class="view-all-btn" data-route="field-notes">View all →</button>
+        </div>
+        <div class="latest-note-card" id="latestNoteCard">
+          <div class="loading-state">Loading latest note…</div>
+        </div>
+      </section>
+
     </main>
 
   </div>
 
-  <!-- FIELD NOTES -->
-  <div class="field-notes-shell" id="fieldNotes" hidden>
+  <!-- FIELD NOTES PAGE -->
+  <div class="field-notes-shell" id="fieldNotes" data-page="field-notes" hidden>
     
     <header class="fn-header">
-      <button class="fn-mark-btn" id="fnHome">
+      <button class="fn-mark-btn" data-route="home" aria-label="Return to homepage">
         <img src="./assets/marks/field-notes.png" alt="Field Notes" class="fn-mark" />
       </button>
       
       <div class="fn-controls">
-        <button class="fn-btn" id="viewToggle">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-grid">
+        <button class="fn-btn" id="viewToggle" aria-label="Toggle grid and list view">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-grid" aria-hidden="true">
             <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
             <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
             <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
             <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
           </svg>
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-list" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-list" style="display:none;" aria-hidden="true">
             <line x1="2" y1="3" x2="14" y2="3" stroke="currentColor" stroke-width="1.5"/>
             <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
             <line x1="2" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5"/>
           </svg>
           <span class="fn-label">Grid</span>
         </button>
-        <button class="fn-btn" id="fnClose">Close</button>
+        <button class="fn-btn" data-route="home" aria-label="Return to homepage">Close</button>
       </div>
     </header>
 
-    <div class="fn-feed" id="fnFeed">
-      <div class="fn-empty">Loading…</div>
+    <div class="fn-feed" id="fnFeed" role="feed" aria-busy="true">
+      <div class="fn-empty">Loading Field Notes…</div>
     </div>
 
   </div>
 
-  <!-- MODAL (Desktop) -->
-  <div id="modal" class="modal-overlay">
-    <div class="modal-backdrop"></div>
+  <!-- TEXT MODAL (Desktop) -->
+  <div id="modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-backdrop" aria-label="Close modal"></div>
     <div class="modal-card">
-      <button class="modal-close">×</button>
+      <button class="modal-close" aria-label="Close">×</button>
       <div class="modal-body" id="modalBody"></div>
       <div class="modal-actions">
-        <a id="modalLink" href="#" target="_blank">Open original →</a>
+        <a id="modalLink" href="#" target="_blank" rel="noopener">Open original →</a>
       </div>
     </div>
   </div>
 
+  <!-- MEDIA LIGHTBOX -->
+  <div id="lightbox" class="lightbox-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="lightbox-backdrop" aria-label="Close lightbox"></div>
+    <button class="lightbox-close" aria-label="Close">×</button>
+    <div class="lightbox-content" id="lightboxContent"></div>
+  </div>
+
   <!-- BOTTOM SHEET (Mobile) -->
-  <div id="sheet" class="bottom-sheet">
-    <div class="sheet-backdrop"></div>
+  <div id="sheet" class="bottom-sheet" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="sheet-backdrop" aria-label="Close"></div>
     <div class="sheet-card">
-      <div class="sheet-handle"></div>
-      <button class="sheet-close">Close</button>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <button class="sheet-close" aria-label="Close">Close</button>
       <div class="sheet-body" id="sheetBody"></div>
       <div class="sheet-actions">
-        <a id="sheetLink" href="#" target="_blank" class="sheet-btn">Open original →</a>
+        <a id="sheetLink" href="#" target="_blank" rel="noopener" class="sheet-btn">Open original →</a>
       </div>
     </div>
   </div>

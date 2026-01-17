@@ -7,6 +7,8 @@
   const isMobile = () => window.innerWidth < 768;
 
   let systemState = 'ready';
+  let cachedNotes = null;
+  let currentRoute = 'home';
 
   const setState = (state) => {
     systemState = state;
@@ -79,6 +81,12 @@
         ? "./assets/marks/field-notes-white.png" 
         : "./assets/marks/field-notes.png";
     }
+
+    // Update theme icon
+    const icon = $(".theme-icon");
+    if (icon) {
+      icon.textContent = theme === "dark" ? "🌙" : "☀️";
+    }
   };
 
   const applyTheme = (theme) => {
@@ -108,7 +116,6 @@
     if (!header) return;
 
     let ticking = false;
-    let lastScroll = 0;
 
     const updateHeader = () => {
       const scroll = window.pageYOffset || document.documentElement.scrollTop;
@@ -123,7 +130,6 @@
         header.style.setProperty('--morph-progress', 0);
       }
 
-      lastScroll = scroll;
       ticking = false;
     };
 
@@ -143,39 +149,32 @@
       });
     }
   };
-  const applyRoute = () => {
-    const hash = window.location.hash.toLowerCase();
-    const showFN = hash === "#field-notes";
-    
+
+  /* ROUTING */
+  const navigate = (route) => {
+    currentRoute = route;
     const main = $("#mainSite");
     const fn = $("#fieldNotes");
     
-    if (showFN) {
+    if (route === "field-notes") {
       if (main) main.hidden = true;
       if (fn) fn.hidden = false;
+      window.scrollTo(0, 0);
     } else {
       if (main) main.hidden = false;
       if (fn) fn.hidden = true;
+      window.scrollTo(0, 0);
     }
   };
 
   const initRouting = () => {
-    window.addEventListener("hashchange", applyRoute);
-    applyRoute();
-
-    const fnHome = $("#fnHome");
-    if (fnHome) {
-      fnHome.addEventListener("click", () => {
-        window.location.hash = "";
+    $$('[data-route]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const route = btn.getAttribute('data-route');
+        navigate(route);
       });
-    }
-
-    const fnClose = $("#fnClose");
-    if (fnClose) {
-      fnClose.addEventListener("click", () => {
-        window.location.hash = "";
-      });
-    }
+    });
   };
 
   /* VIEW TOGGLE */
@@ -217,7 +216,7 @@
     toggle.addEventListener("click", () => apply(view === "grid" ? "list" : "grid"));
   };
 
-  /* FIELD NOTES */
+  /* FIELD NOTES API */
   const API_ID = "2ea3c4a766e480b7a46ed6bb8d6cde82";
   const API_URL = `https://notion-api.splitbee.io/v1/table/${API_ID}`;
 
@@ -278,7 +277,7 @@
 
   const getUrl = (r) => r?.__url || r?.URL || r?.Url || r?.Link || "";
 
-  const renderCard = (row, idx) => {
+  const renderCard = (row, idx, isPreview = false) => {
     const title = row?.Title || row?.Name || "Field note";
     const type = row?.Type || "Note";
     const excerpt = row?.Excerpt || row?.Text || row?.Content || "";
@@ -286,16 +285,17 @@
     const url = getUrl(row);
     const media = getMedia(row);
     const hasMedia = Boolean(media);
-    const size = pickSize(idx, hasMedia);
+    const size = isPreview ? "l" : pickSize(idx, hasMedia);
 
     if (!hasMedia) {
       const quote = excerpt || title;
       return `
         <article class="fn-card ${size} text">
           <button class="fn-card-btn"
+            data-type="text"
             data-url="${esc(url)}"
             data-title="${esc(title)}"
-            data-type="${esc(type)}"
+            data-card-type="${esc(type)}"
             data-date="${esc(date)}"
             data-excerpt="${esc(excerpt)}">
             <div class="fn-tag">${esc(type)}</div>
@@ -313,17 +313,18 @@
     }
 
     const mediaEl = isVideo(media)
-      ? `<video class="fn-media" src="${esc(media)}" muted playsinline preload="metadata"></video>`
-      : `<img class="fn-media" src="${esc(media)}" alt="" loading="lazy" />`;
+      ? `<video class="fn-media" src="${esc(media)}" muted playsinline preload="metadata" aria-label="${esc(title)}"></video>`
+      : `<img class="fn-media" src="${esc(media)}" alt="${esc(title)}" loading="lazy" />`;
 
     return `
       <article class="fn-card ${size} media">
         <button class="fn-card-btn"
-          data-url="${esc(url)}"
+          data-type="media"
+          data-media="${esc(media)}"
+          data-is-video="${isVideo(media)}"
           data-title="${esc(title)}"
-          data-type="${esc(type)}"
-          data-date="${esc(date)}"
-          data-excerpt="${esc(excerpt)}">
+          data-card-type="${esc(type)}"
+          data-date="${esc(date)}">
           ${mediaEl}
           <div class="fn-scrim"></div>
           <div class="fn-meta">
@@ -335,7 +336,8 @@
     `;
   };
 
-  const openModal = ({ title, type, date, excerpt, url }) => {
+  /* MODALS */
+  const openTextModal = ({ title, type, date, excerpt, url }) => {
     if (isMobile()) {
       openSheet({ title, type, date, excerpt, url });
     } else {
@@ -365,10 +367,12 @@
       link.style.display = "none";
     }
 
+    modal.setAttribute("aria-hidden", "false");
     modal.classList.add("is-open");
     document.body.style.overflow = 'hidden';
 
     const closeModal = () => {
+      modal.setAttribute("aria-hidden", "true");
       modal.classList.remove("is-open");
       document.body.style.overflow = '';
     };
@@ -377,9 +381,18 @@
     modal.onclick = (e) => {
       if (e.target.classList.contains('modal-backdrop')) closeModal();
     };
-    document.addEventListener("keydown", (e) => {
+
+    // Keyboard navigation
+    const handleKey = (e) => {
       if (e.key === "Escape") closeModal();
+    };
+    document.addEventListener("keydown", handleKey);
+    modal.addEventListener("close", () => {
+      document.removeEventListener("keydown", handleKey);
     }, { once: true });
+
+    // Focus trap
+    close.focus();
   };
 
   const openSheet = ({ title, type, date, excerpt, url }) => {
@@ -404,10 +417,12 @@
       link.style.display = "none";
     }
 
+    sheet.setAttribute("aria-hidden", "false");
     sheet.classList.add("is-open");
     document.body.style.overflow = 'hidden';
 
     const closeSheet = () => {
+      sheet.setAttribute("aria-hidden", "true");
       sheet.classList.remove("is-open");
       document.body.style.overflow = '';
     };
@@ -416,15 +431,57 @@
     sheet.onclick = (e) => {
       if (e.target.classList.contains('sheet-backdrop')) closeSheet();
     };
+
+    close.focus();
   };
 
-  async function loadFieldNotes() {
-    const feed = $("#fnFeed");
-    if (!feed) return;
+  /* MEDIA LIGHTBOX */
+  const openLightbox = ({ media, isVideo, title }) => {
+    const lightbox = $("#lightbox");
+    const content = $("#lightboxContent");
+    const close = $(".lightbox-close", lightbox);
+    const backdrop = $(".lightbox-backdrop", lightbox);
+
+    if (!lightbox || !content || !close) return;
+
+    if (isVideo === "true" || isVideo === true) {
+      content.innerHTML = `<video src="${esc(media)}" controls playsinline autoplay class="lightbox-media" aria-label="${esc(title)}"></video>`;
+    } else {
+      content.innerHTML = `<img src="${esc(media)}" alt="${esc(title)}" class="lightbox-media" />`;
+    }
+
+    lightbox.setAttribute("aria-hidden", "false");
+    lightbox.classList.add("is-open");
+    document.body.style.overflow = 'hidden';
+
+    const closeLightbox = () => {
+      lightbox.setAttribute("aria-hidden", "true");
+      lightbox.classList.remove("is-open");
+      document.body.style.overflow = '';
+      content.innerHTML = '';
+    };
+
+    close.onclick = closeLightbox;
+    backdrop.onclick = closeLightbox;
+
+    // Keyboard navigation
+    const handleKey = (e) => {
+      if (e.key === "Escape") closeLightbox();
+    };
+    document.addEventListener("keydown", handleKey);
+    lightbox.addEventListener("close", () => {
+      document.removeEventListener("keydown", handleKey);
+    }, { once: true });
+
+    close.focus();
+  };
+
+  /* LOAD FIELD NOTES (CACHED) */
+  async function fetchFieldNotes() {
+    if (cachedNotes) return cachedNotes;
 
     try {
       setState('active');
-
       const res = await fetch(API_URL, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -438,33 +495,88 @@
         return db - da;
       });
 
+      cachedNotes = posts;
+      setState('ready');
+      return posts;
+
+    } catch (err) {
+      console.error("Field Notes fetch error:", err);
+      setState('ready');
+      return [];
+    }
+  }
+
+  async function loadLatestNote() {
+    const container = $("#latestNoteCard");
+    if (!container) return;
+
+    try {
+      const notes = await fetchFieldNotes();
+      
+      if (!notes.length) {
+        container.innerHTML = `<div class="error-state">No notes published yet.</div>`;
+        return;
+      }
+
+      const latest = notes[0];
+      container.innerHTML = renderCard(latest, 0, true);
+
+      attachCardListeners(container);
+
+    } catch (err) {
+      console.error("Latest note error:", err);
+      container.innerHTML = `<div class="error-state">Could not load latest note.</div>`;
+    }
+  }
+
+  async function loadFieldNotes() {
+    const feed = $("#fnFeed");
+    if (!feed) return;
+
+    try {
+      feed.setAttribute('aria-busy', 'true');
+      const posts = await fetchFieldNotes();
+
       if (!posts.length) {
         feed.innerHTML = `<div class="fn-empty">No public notes yet.</div>`;
-        setState('ready');
+        feed.setAttribute('aria-busy', 'false');
         return;
       }
 
       feed.innerHTML = posts.map(renderCard).join("");
+      feed.setAttribute('aria-busy', 'false');
 
-      $$(".fn-card-btn", feed).forEach(btn => {
-        btn.addEventListener("click", () => {
-          openModal({
+      attachCardListeners(feed);
+
+    } catch (err) {
+      console.error("Field Notes error:", err);
+      feed.innerHTML = `<div class="fn-empty error-state">Could not load Field Notes. Please try again later.</div>`;
+      feed.setAttribute('aria-busy', 'false');
+    }
+  }
+
+  function attachCardListeners(container) {
+    $$(".fn-card-btn", container).forEach(btn => {
+      btn.addEventListener("click", () => {
+        const cardType = btn.getAttribute("data-type");
+        
+        if (cardType === "media") {
+          openLightbox({
+            media: btn.getAttribute("data-media"),
+            isVideo: btn.getAttribute("data-is-video"),
+            title: btn.getAttribute("data-title")
+          });
+        } else {
+          openTextModal({
             title: btn.getAttribute("data-title") || "",
-            type: btn.getAttribute("data-type") || "",
+            type: btn.getAttribute("data-card-type") || "",
             date: btn.getAttribute("data-date") || "",
             excerpt: btn.getAttribute("data-excerpt") || "",
             url: btn.getAttribute("data-url") || ""
           });
-        });
+        }
       });
-
-      setState('ready');
-
-    } catch (err) {
-      console.error(err);
-      feed.innerHTML = `<div class="fn-empty">Could not load Field Notes.</div>`;
-      setState('ready');
-    }
+    });
   }
 
   /* INIT */
@@ -474,6 +586,7 @@
     initRouting();
     initViewToggle();
     setState('ready');
+    loadLatestNote();
     loadFieldNotes();
   };
 
