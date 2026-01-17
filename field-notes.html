@@ -39,19 +39,27 @@
   <div class="field-notes-shell">
 
     <div class="fn-hero">
-      <img
-        src="./assets/marks/field-notes.png"
-        data-src-light="./assets/marks/field-notes.png"
-        data-src-dark="./assets/marks/field-notes-white.png"
-        alt="Field Notes"
-        class="fn-logo"
-      />
+      <button class="fn-logo-btn" id="fnLogoBtn" aria-label="Scroll to top">
+        <img
+          src="./assets/marks/field-notes.png"
+          data-src-light="./assets/marks/field-notes.png"
+          data-src-dark="./assets/marks/field-notes-white.png"
+          alt="Field Notes"
+          class="fn-logo"
+        />
+      </button>
       <p class="fn-tagline">Fragments, observations, and working material collected over time.</p>
       <p class="fn-subtitle">Images, text, and references — shared without hierarchy or polish.</p>
     </div>
 
     <div class="fn-controls-bar">
       <div class="fn-filters">
+        <a href="index.html" class="fn-home-link" aria-label="Return to Scott Bertrand home">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 8L8 2L14 8M3 7V14H6V10H10V14H13V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Home</span>
+        </a>
         <select id="typeFilter" class="fn-filter" aria-label="Filter by type">
           <option value="all">All Types</option>
         </select>

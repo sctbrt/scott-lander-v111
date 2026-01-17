@@ -463,9 +463,20 @@
     renderFeed();
   }
 
+  /* LOGO NAVIGATION */
+  const initLogoNav = () => {
+    const logoBtn = $("#fnLogoBtn");
+    if (logoBtn) {
+      logoBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+  };
+
   /* INIT */
   const init = () => {
     initTheme();
+    initLogoNav();
     initViewToggle();
     initFilters();
     initLoadMore();
