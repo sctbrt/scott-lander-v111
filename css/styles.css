@@ -380,7 +380,7 @@ button {
 }
 
 .brand-wordmark {
-  max-width: 180px;
+  max-width: 280px;
   opacity: 1;
   transition:
     opacity 700ms linear,
@@ -388,7 +388,7 @@ button {
 }
 
 .morph-header.morphed .brand-wordmark {
-  max-width: 180px;
+  max-width: 280px;
 }
 
 .brand-wordmark img {
@@ -1556,7 +1556,7 @@ body.header-morphed .field-notes-shell {
   }
 
   .morph-header.morphed .brand-wordmark {
-    max-width: 140px;
+    max-width: 218px;
   }
 
   .hero-text {
@@ -1640,7 +1640,7 @@ body.header-morphed .field-notes-shell {
   }
 
   .morph-header.morphed .brand-wordmark {
-    max-width: 120px;
+    max-width: 187px;
   }
 
   .hero {
