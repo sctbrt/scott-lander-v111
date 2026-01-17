@@ -168,10 +168,19 @@
     updateHeader();
 
     const grilleBtn = $("#grilleBtn");
+    const wordmark = $(".brand-wordmark");
+
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     if (grilleBtn) {
-      grilleBtn.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+      grilleBtn.addEventListener('click', scrollToTop);
+    }
+
+    if (wordmark) {
+      wordmark.style.cursor = 'pointer';
+      wordmark.addEventListener('click', scrollToTop);
     }
   };
 
