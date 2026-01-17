@@ -177,31 +177,19 @@
 
   /* ROUTING */
   const navigate = (route) => {
-    const main = $("#mainSite");
-    const fn = $("#fieldNotes");
     const about = $("#aboutSection");
     const philosophy = $("#philosophySection");
 
-    if (route === "field-notes") {
-      if (main) main.hidden = true;
-      if (fn) fn.hidden = false;
-      window.scrollTo(0, 0);
-    } else if (route === "about") {
-      if (main) main.hidden = false;
-      if (fn) fn.hidden = true;
+    if (route === "about") {
       if (about) {
         about.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else if (route === "philosophy") {
-      if (main) main.hidden = false;
-      if (fn) fn.hidden = true;
       if (philosophy) {
         philosophy.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else {
-      if (main) main.hidden = false;
-      if (fn) fn.hidden = true;
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -799,12 +787,8 @@
     initMorphHeader();
     initScrollTransforms();
     initRouting();
-    initViewToggle();
-    initFilters();
-    initLoadMore();
     setState('ready');
     loadLatestNote();
-    loadFieldNotes();
   };
 
   if (document.readyState === "loading") {
