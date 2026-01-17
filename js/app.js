@@ -164,6 +164,9 @@
 
     window.addEventListener('scroll', requestTick, { passive: true });
 
+    // Set initial state
+    updateHeader();
+
     const grilleBtn = $("#grilleBtn");
     if (grilleBtn) {
       grilleBtn.addEventListener('click', () => {
@@ -298,7 +301,7 @@
   const isVideo = (url) => {
     if (!url) return false;
     const u = url.toLowerCase();
-    return u.endsWith(".mp4") || u.endsWith(".mov") || u.includes("video");
+    return u.endsWith(".mp4") || u.endsWith(".mov") || u.endsWith(".webm") || u.endsWith(".avi");
   };
 
   const pickSize = (i, hasMedia) => {
@@ -460,10 +463,15 @@
     modal.classList.add("is-open");
     document.body.style.overflow = 'hidden';
 
+    const handleKey = (e) => {
+      if (e.key === "Escape") closeModal();
+    };
+
     const closeModal = () => {
       modal.setAttribute("aria-hidden", "true");
       modal.classList.remove("is-open");
       document.body.style.overflow = '';
+      document.removeEventListener("keydown", handleKey);
     };
 
     close.onclick = closeModal;
@@ -471,13 +479,7 @@
       if (e.target.classList.contains('modal-backdrop')) closeModal();
     };
 
-    const handleKey = (e) => {
-      if (e.key === "Escape") closeModal();
-    };
     document.addEventListener("keydown", handleKey);
-    modal.addEventListener("close", () => {
-      document.removeEventListener("keydown", handleKey);
-    }, { once: true });
 
     close.focus();
   };
@@ -508,16 +510,23 @@
     sheet.classList.add("is-open");
     document.body.style.overflow = 'hidden';
 
+    const handleKey = (e) => {
+      if (e.key === "Escape") closeSheet();
+    };
+
     const closeSheet = () => {
       sheet.setAttribute("aria-hidden", "true");
       sheet.classList.remove("is-open");
       document.body.style.overflow = '';
+      document.removeEventListener("keydown", handleKey);
     };
 
     close.onclick = closeSheet;
     sheet.onclick = (e) => {
       if (e.target.classList.contains('sheet-backdrop')) closeSheet();
     };
+
+    document.addEventListener("keydown", handleKey);
 
     close.focus();
   };
@@ -541,23 +550,22 @@
     lightbox.classList.add("is-open");
     document.body.style.overflow = 'hidden';
 
+    const handleKey = (e) => {
+      if (e.key === "Escape") closeLightbox();
+    };
+
     const closeLightbox = () => {
       lightbox.setAttribute("aria-hidden", "true");
       lightbox.classList.remove("is-open");
       document.body.style.overflow = '';
       content.innerHTML = '';
+      document.removeEventListener("keydown", handleKey);
     };
 
     close.onclick = closeLightbox;
     backdrop.onclick = closeLightbox;
 
-    const handleKey = (e) => {
-      if (e.key === "Escape") closeLightbox();
-    };
     document.addEventListener("keydown", handleKey);
-    lightbox.addEventListener("close", () => {
-      document.removeEventListener("keydown", handleKey);
-    }, { once: true });
 
     close.focus();
   };
