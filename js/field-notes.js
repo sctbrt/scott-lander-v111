@@ -56,6 +56,7 @@
   const getMedia = (r) => {
     const m = r?.Media || r?.Image || r?.Photo || r?.Video;
     if (typeof m === "string") return m;
+    if (Array.isArray(m) && m[0]?.url) return m[0].url;
     if (m?.url) return m.url;
     return "";
   };
@@ -74,7 +75,7 @@
   const getUrl = (r) => r?.__url || r?.URL || r?.Url || r?.Link || "";
 
   const renderCard = (row, idx, isPreview = false) => {
-    const title = row?.Title || row?.Name || "Field note";
+    const title = row?.Title || row?.Name || row?.Excerpt || "Field note";
     const type = row?.Type || "Note";
     const excerpt = row?.Excerpt || row?.Text || row?.Content || "";
     const date = row?.Published || row?.Date || row?.Created || "";
@@ -365,14 +366,18 @@
     if (cachedNotes) return cachedNotes;
 
     try {
-      const resp = await fetch("https://api.raindrop.io/rest/v1/raindrops/50253346?perpage=50", {
-        headers: { "Authorization": "Bearer ee2dabb3-4d35-4f65-b46d-56dd8df9aa47" }
-      });
+      const API_ID = "2ea3c4a766e480b7a46ed6bb8d6cde82";
+      const API_URL = `https://notion-api.splitbee.io/v1/table/${API_ID}`;
+
+      const resp = await fetch(API_URL, { cache: "no-store" });
 
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-      const json = await resp.json();
-      cachedNotes = json?.items || [];
+      const rows = await resp.json();
+      const all = Array.isArray(rows) ? rows : [];
+      const published = all.filter(r => r?.Public === true);
+
+      cachedNotes = published;
       return cachedNotes;
     } catch (err) {
       console.error("Error fetching Field Notes:", err);
