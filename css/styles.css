@@ -626,10 +626,16 @@ body.header-morphed .field-notes-shell {
   margin: 0 auto;
 }
 
-/* About Section - Architectural, tight vertical rhythm */
+/* About Section - Apple-like scroll transformations */
 .about-section {
   padding: 100px 20px;
   scroll-margin-top: 100px;
+  transition: padding 800ms linear, background 800ms linear;
+}
+
+.about-section.in-view {
+  padding: 120px 20px;
+  background: linear-gradient(180deg, transparent 0%, var(--surface) 50%, transparent 100%);
 }
 
 .section-title {
@@ -639,6 +645,12 @@ body.header-morphed .field-notes-shell {
   color: var(--text-muted);
   font-weight: 600;
   margin-bottom: 36px;
+  transition: font-size 800ms linear, letter-spacing 800ms linear;
+}
+
+.about-section.in-view .section-title {
+  font-size: 14px;
+  letter-spacing: 0.16em;
 }
 
 .about-content {
@@ -646,6 +658,12 @@ body.header-morphed .field-notes-shell {
   flex-direction: column;
   gap: 28px;
   max-width: 680px;
+  transition: gap 800ms linear, max-width 800ms linear;
+}
+
+.about-section.in-view .about-content {
+  gap: 32px;
+  max-width: 720px;
 }
 
 .about-content p {
@@ -654,13 +672,25 @@ body.header-morphed .field-notes-shell {
   font-weight: 400;
   letter-spacing: -0.005em;
   color: var(--text);
+  transition: font-size 800ms linear, line-height 800ms linear;
 }
 
-/* Design Philosophy Section */
+.about-section.in-view .about-content p {
+  font-size: 19px;
+  line-height: 1.8;
+}
+
+/* Design Philosophy Section - Apple-like transformations */
 .philosophy-section {
   padding: 100px 20px;
   scroll-margin-top: 100px;
   background: linear-gradient(180deg, transparent 0%, var(--surface) 100%);
+  transition: padding 800ms linear, background 800ms linear;
+}
+
+.philosophy-section.in-view {
+  padding: 120px 20px;
+  background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
 }
 
 .philosophy-content {
@@ -668,6 +698,12 @@ body.header-morphed .field-notes-shell {
   flex-direction: column;
   gap: 28px;
   max-width: 680px;
+  transition: gap 800ms linear, max-width 800ms linear;
+}
+
+.philosophy-section.in-view .philosophy-content {
+  gap: 32px;
+  max-width: 720px;
 }
 
 .philosophy-content p {
@@ -676,12 +712,23 @@ body.header-morphed .field-notes-shell {
   font-weight: 400;
   letter-spacing: -0.005em;
   color: var(--text);
+  transition: font-size 800ms linear, line-height 800ms linear;
+}
+
+.philosophy-section.in-view .philosophy-content p {
+  font-size: 19px;
+  line-height: 1.8;
 }
 
 .philosophy-content p:last-child {
   font-weight: 500;
   font-style: italic;
   color: var(--text-muted);
+  transition: font-size 800ms linear;
+}
+
+.philosophy-section.in-view .philosophy-content p:last-child {
+  font-size: 20px;
 }
 
 /* Latest Note */
@@ -772,6 +819,57 @@ body.header-morphed .field-notes-shell {
   z-index: 1;
   display: flex;
   flex-direction: column;
+}
+
+/* Sky atmosphere - day mode */
+.field-notes-shell::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background: linear-gradient(180deg,
+    rgba(135, 206, 235, 0.08) 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  opacity: 1;
+  transition: opacity 1200ms linear, background 1200ms linear;
+  pointer-events: none;
+}
+
+/* Night mode sky */
+[data-theme="dark"] .field-notes-shell::before {
+  background: linear-gradient(180deg,
+    rgba(10, 10, 30, 0.6) 0%,
+    rgba(20, 20, 40, 0.3) 40%,
+    rgba(0, 0, 0, 0) 70%
+  );
+}
+
+/* Subtle cloud layer - day mode only */
+.field-notes-shell::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  z-index: -1;
+  background-image:
+    radial-gradient(ellipse 800px 300px at 20% 10%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 600px 250px at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 700px 280px at 50% 15%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+  opacity: 0.7;
+  transition: opacity 1200ms linear;
+  pointer-events: none;
+}
+
+/* Hide clouds at night */
+[data-theme="dark"] .field-notes-shell::after {
+  opacity: 0;
 }
 
 .fn-hero {

@@ -705,6 +705,30 @@
     });
   }
 
+  /* SCROLL TRANSFORMATIONS */
+  const initScrollTransforms = () => {
+    if (!('IntersectionObserver' in window)) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+        } else {
+          entry.target.classList.remove('in-view');
+        }
+      });
+    }, {
+      threshold: 0.3,
+      rootMargin: '-10% 0px -10% 0px'
+    });
+
+    const about = $('#aboutSection');
+    const philosophy = $('#philosophySection');
+
+    if (about) observer.observe(about);
+    if (philosophy) observer.observe(philosophy);
+  };
+
   /* PRELUDE / BOOT SEQUENCE */
   const initPrelude = () => {
     const PRELUDE_KEY = "sb_prelude_shown";
@@ -761,6 +785,7 @@
     initPrelude();
     initMobileMenu();
     initMorphHeader();
+    initScrollTransforms();
     initRouting();
     initViewToggle();
     initFilters();
