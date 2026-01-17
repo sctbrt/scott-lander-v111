@@ -28,6 +28,10 @@ body {
   overflow-x: hidden;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Arial", sans-serif;
   font-weight: 400;
@@ -253,12 +257,16 @@ button {
   right: 0;
   z-index: 100;
 
-  --morph-progress: 0;
+  --morph-progress: 1;
 
   display: grid;
   place-items: center;
-  min-height: 100vh;
-  padding: 60px 24px;
+  min-height: 0;
+  padding: 20px 24px;
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
 
   transition:
     min-height 700ms linear,
@@ -279,8 +287,10 @@ button {
 
 .morph-inner {
   display: grid;
-  justify-items: center;
-  gap: calc(40px * (1 - var(--morph-progress)));
+  grid-template-columns: auto 1fr auto;
+  justify-items: start;
+  align-items: center;
+  gap: 24px;
   text-align: center;
   width: 100%;
   max-width: 1400px;
@@ -297,8 +307,9 @@ button {
 
 /* Indicators */
 .morph-header .indicator-pills {
-  opacity: calc(1 - var(--morph-progress));
-  transform: translateY(calc(var(--morph-progress) * -20px));
+  display: none;
+  opacity: 0;
+  transform: translateY(-20px);
   transition: opacity 700ms linear,
               transform 700ms linear;
   pointer-events: auto;
@@ -311,9 +322,9 @@ button {
 /* Logo Lockup - Horizontal */
 .logo-lockup {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: calc(32px * (1 - var(--morph-progress)));
+  gap: 12px;
   transition:
     flex-direction 700ms linear,
     gap 700ms linear;
@@ -326,8 +337,8 @@ button {
 }
 
 .speaker-grille {
-  width: calc(360px - (300px * var(--morph-progress)));
-  height: calc(360px - (300px * var(--morph-progress)));
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: 2px solid var(--stroke);
   background: var(--surface);
@@ -336,7 +347,7 @@ button {
   display: grid;
   place-items: center;
   overflow: hidden;
-  box-shadow: var(--shadow-strong);
+  box-shadow: var(--shadow);
   flex-shrink: 0;
 
   transition:
@@ -350,6 +361,8 @@ button {
 
 .morph-header.morphed .speaker-grille {
   box-shadow: var(--shadow);
+  width: 60px;
+  height: 60px;
 }
 
 .morph-header .speaker-grille:hover {
@@ -367,7 +380,7 @@ button {
 }
 
 .brand-wordmark {
-  max-width: min(800px, 90vw);
+  max-width: 180px;
   opacity: 1;
   transition:
     opacity 700ms linear,
@@ -388,7 +401,7 @@ button {
   display: flex;
   gap: 8px;
   align-items: center;
-  opacity: calc(var(--morph-progress));
+  opacity: 1;
   transform: translateX(calc((1 - var(--morph-progress)) * 20px));
   transition:
     opacity 700ms linear,
@@ -574,7 +587,7 @@ button {
 /* MAIN SITE */
 .site-shell {
   min-height: 100vh;
-  padding: 100vh 24px 0;
+  padding: 100px 24px 0;
   position: relative;
   z-index: 1;
   display: flex;
@@ -1514,8 +1527,13 @@ body.header-morphed .field-notes-shell {
   }
 
   .speaker-grille {
-    width: calc(280px - (220px * var(--morph-progress)));
-    height: calc(280px - (220px * var(--morph-progress)));
+    width: 60px;
+    height: 60px;
+  }
+
+  .morph-header.morphed .speaker-grille {
+    width: 60px;
+    height: 60px;
   }
 
   .morph-header.morphed .brand-wordmark {
@@ -1580,7 +1598,7 @@ body.header-morphed .field-notes-shell {
 @media (max-width: 520px) {
   .site-shell,
   .field-notes-shell {
-    padding-top: 100vh;
+    padding-top: 92px;
   }
 
   body.header-morphed .site-shell,
@@ -1589,8 +1607,13 @@ body.header-morphed .field-notes-shell {
   }
 
   .speaker-grille {
-    width: calc(240px - (180px * var(--morph-progress)));
-    height: calc(240px - (180px * var(--morph-progress)));
+    width: 52px;
+    height: 52px;
+  }
+
+  .morph-header.morphed .speaker-grille {
+    width: 52px;
+    height: 52px;
   }
 
   .morph-header.morphed {
