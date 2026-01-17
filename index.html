@@ -219,68 +219,6 @@
 
   </div>
 
-  <!-- FIELD NOTES PAGE -->
-  <div class="field-notes-shell" id="fieldNotes" data-page="field-notes" hidden>
-    
-    <div class="fn-hero">
-      <img 
-        src="./assets/marks/field-notes.png" 
-        data-src-light="./assets/marks/field-notes.png"
-        data-src-dark="./assets/marks/field-notes-white.png"
-        alt="Field Notes" 
-        class="fn-logo" 
-      />
-      <p class="fn-tagline">Fragments, observations, and working material collected over time.</p>
-      <p class="fn-subtitle">Images, text, and references — shared without hierarchy or polish.</p>
-    </div>
-
-    <div class="fn-controls-bar">
-      <div class="fn-filters">
-        <select id="typeFilter" class="fn-filter" aria-label="Filter by type">
-          <option value="all">All Types</option>
-        </select>
-        <select id="dateFilter" class="fn-filter" aria-label="Filter by date">
-          <option value="all">All Time</option>
-          <option value="month">Past Month</option>
-          <option value="quarter">Past Quarter</option>
-          <option value="year">Past Year</option>
-        </select>
-      </div>
-      <button class="fn-btn" id="viewToggle" aria-label="Toggle view">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-grid" aria-hidden="true">
-          <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-          <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-          <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-          <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-list" style="display:none;" aria-hidden="true">
-          <line x1="2" y1="3" x2="14" y2="3" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="2" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-        <span class="fn-label">Grid</span>
-      </button>
-    </div>
-
-    <div class="fn-feed" id="fnFeed" role="feed" aria-busy="true">
-      <div class="loading-state">
-        <div class="loading-spinner"></div>
-        <p>Loading Field Notes…</p>
-      </div>
-    </div>
-
-    <div class="fn-load-more" id="loadMoreContainer" hidden>
-      <button class="load-more-btn" id="loadMoreBtn">Load More</button>
-      <p class="items-shown" id="itemsShown"></p>
-    </div>
-
-    <!-- Footer -->
-    <footer class="site-footer" role="contentinfo">
-      <p>&copy; 2026 Scott Bertrand. All rights reserved.</p>
-    </footer>
-
-  </div>
-
   <!-- TEXT MODAL (Desktop) -->
   <div id="modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-backdrop" aria-label="Close modal"></div>
