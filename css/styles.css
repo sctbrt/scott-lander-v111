@@ -209,8 +209,8 @@ button {
 }
 
 .prelude-mark {
-  width: 200px;
-  height: 200px;
+  width: 120px;
+  height: 120px;
   opacity: 0;
   transform: scale(0.94);
   animation: revealMark 1000ms linear 1400ms forwards;
@@ -223,7 +223,7 @@ button {
 }
 
 .prelude-wordmark {
-  max-width: 400px;
+  max-width: 280px;
   opacity: 0;
   transform: translateY(8px);
   animation: revealWordmark 800ms linear 2000ms forwards;
@@ -1654,6 +1654,15 @@ body.header-morphed .field-notes-shell {
   .lightbox-close {
     top: 16px;
     right: 16px;
+  }
+
+  .prelude-mark {
+    width: 90px;
+    height: 90px;
+  }
+
+  .prelude-wordmark {
+    max-width: 220px;
   }
 }
 
