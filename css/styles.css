@@ -272,13 +272,12 @@ button {
     min-height 700ms linear,
     padding 700ms linear,
     background 700ms linear;
-
-  pointer-events: none;
 }
 
 .morph-header.morphed {
   min-height: 0;
   padding: 20px 24px;
+  pointer-events: auto;
   background: var(--surface);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
