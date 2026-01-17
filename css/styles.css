@@ -457,10 +457,10 @@ button {
   padding: 10px;
   opacity: calc(var(--morph-progress));
   transform: translateX(calc((1 - var(--morph-progress)) * 20px));
-  transition: 
-    opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 600ms cubic-bezier(0.22, 1, 0.36, 1),
-    background 180ms ease;
+  transition:
+    opacity 700ms linear,
+    transform 700ms linear,
+    background 300ms linear;
   pointer-events: auto;
 }
 
@@ -506,7 +506,7 @@ button {
   -webkit-backdrop-filter: blur(20px);
   box-shadow: -8px 0 40px rgba(0,0,0,0.30);
   transform: translateX(100%);
-  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 400ms linear;
   display: flex;
   flex-direction: column;
 }
@@ -586,12 +586,12 @@ button {
   z-index: 1;
   display: flex;
   flex-direction: column;
-  transition: padding-top 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: padding-top 700ms linear;
 }
 
 body.header-morphed .site-shell,
 body.header-morphed .field-notes-shell {
-  padding-top: 80px;
+  padding-top: 100px;
 }
 
 .main-content {
@@ -819,6 +819,7 @@ body.header-morphed .field-notes-shell {
   z-index: 1;
   display: flex;
   flex-direction: column;
+  transition: padding-top 700ms linear;
 }
 
 /* Sky atmosphere - day mode */
@@ -1092,7 +1093,7 @@ body.header-morphed .field-notes-shell {
   object-fit: cover;
   position: absolute;
   inset: 0;
-  transition: transform 450ms ease;
+  transition: transform 450ms linear;
 }
 
 .fn-card.media:hover .fn-media {
@@ -1204,7 +1205,7 @@ body.header-morphed .field-notes-shell {
   padding: 20px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 320ms ease;
+  transition: opacity 400ms linear;
 }
 
 .modal-overlay.is-open {
@@ -1235,7 +1236,7 @@ body.header-morphed .field-notes-shell {
   position: relative;
   z-index: 1;
   transform: scale(0.95);
-  transition: transform 320ms ease;
+  transition: transform 400ms linear;
 }
 
 .modal-overlay.is-open .modal-card {
@@ -1333,7 +1334,7 @@ body.header-morphed .field-notes-shell {
   padding: 20px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 320ms ease;
+  transition: opacity 400ms linear;
 }
 
 .lightbox-overlay.is-open {
@@ -1397,7 +1398,7 @@ body.header-morphed .field-notes-shell {
   display: none;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 320ms ease;
+  transition: opacity 400ms linear;
 }
 
 .bottom-sheet.is-open {
@@ -1429,7 +1430,7 @@ body.header-morphed .field-notes-shell {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   transform: translateY(100%);
-  transition: transform 320ms ease;
+  transition: transform 400ms linear;
 }
 
 .bottom-sheet.is-open .sheet-card {
@@ -1591,7 +1592,7 @@ body.header-morphed .field-notes-shell {
 
   body.header-morphed .site-shell,
   body.header-morphed .field-notes-shell {
-    padding-top: 64px;
+    padding-top: 92px;
   }
 
   .speaker-grille {
