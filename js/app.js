@@ -8,7 +8,9 @@
 
   let systemState = 'ready';
   let cachedNotes = null;
-  let currentRoute = 'home';
+  let filteredNotes = [];
+  let displayedCount = 12;
+  const ITEMS_PER_PAGE = 12;
 
   const setState = (state) => {
     systemState = state;
@@ -46,17 +48,11 @@
   const THEME_KEY = "sb_theme";
 
   const getTheme = () => {
-    try {
-      return localStorage.getItem(THEME_KEY);
-    } catch {
-      return null;
-    }
+    try { return localStorage.getItem(THEME_KEY); } catch { return null; }
   };
 
   const saveTheme = (t) => {
-    try {
-      localStorage.setItem(THEME_KEY, t);
-    } catch {}
+    try { localStorage.setItem(THEME_KEY, t); } catch {}
   };
 
   const getTimeTheme = () => {
@@ -75,18 +71,9 @@
         : img.getAttribute("data-src-light");
     });
 
-    const fnMark = $(".fn-mark");
-    if (fnMark) {
-      fnMark.src = theme === "dark" 
-        ? "./assets/marks/field-notes-white.png" 
-        : "./assets/marks/field-notes.png";
-    }
-
-    // Update theme icon
-    const icon = $(".theme-icon");
-    if (icon) {
+    $$(".theme-icon, .mobile-theme-icon").forEach(icon => {
       icon.textContent = theme === "dark" ? "🌙" : "☀️";
-    }
+    });
   };
 
   const applyTheme = (theme) => {
@@ -99,15 +86,48 @@
     const initial = stored || getTimeTheme();
     applyTheme(initial);
 
-    const toggle = $("#themeToggle");
-    if (toggle) {
-      toggle.addEventListener("click", () => {
-        const current = root.getAttribute("data-theme");
-        const next = current === "dark" ? "light" : "dark";
-        saveTheme(next);
-        applyTheme(next);
-      });
-    }
+    const toggleTheme = () => {
+      const current = root.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+      saveTheme(next);
+      applyTheme(next);
+    };
+
+    const desktopToggle = $("#themeToggle");
+    const mobileToggle = $("#mobileThemeToggle");
+    
+    if (desktopToggle) desktopToggle.addEventListener("click", toggleTheme);
+    if (mobileToggle) mobileToggle.addEventListener("click", toggleTheme);
+  };
+
+  /* MOBILE MENU */
+  const initMobileMenu = () => {
+    const menuBtn = $("#mobileMenuBtn");
+    const menu = $("#mobileMenu");
+    const closeBtn = $("#mobileMenuClose");
+    const backdrop = $(".mobile-menu-backdrop", menu);
+
+    if (!menuBtn || !menu) return;
+
+    const openMenu = () => {
+      menu.setAttribute("aria-hidden", "false");
+      menu.classList.add("is-open");
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeMenu = () => {
+      menu.setAttribute("aria-hidden", "true");
+      menu.classList.remove("is-open");
+      document.body.style.overflow = '';
+    };
+
+    menuBtn.addEventListener("click", openMenu);
+    if (closeBtn) closeBtn.addEventListener("click", closeMenu);
+    if (backdrop) backdrop.addEventListener("click", closeMenu);
+
+    $$(".mobile-nav-link", menu).forEach(link => {
+      link.addEventListener("click", closeMenu);
+    });
   };
 
   /* MORPHING HEADER */
@@ -152,14 +172,20 @@
 
   /* ROUTING */
   const navigate = (route) => {
-    currentRoute = route;
     const main = $("#mainSite");
     const fn = $("#fieldNotes");
+    const about = $("#aboutSection");
     
     if (route === "field-notes") {
       if (main) main.hidden = true;
       if (fn) fn.hidden = false;
       window.scrollTo(0, 0);
+    } else if (route === "about") {
+      if (main) main.hidden = false;
+      if (fn) fn.hidden = true;
+      if (about) {
+        about.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     } else {
       if (main) main.hidden = false;
       if (fn) fn.hidden = true;
@@ -190,9 +216,7 @@
     const label = $(".fn-label", toggle);
 
     let view = "grid";
-    try {
-      view = localStorage.getItem(VIEW_KEY) || "grid";
-    } catch {}
+    try { view = localStorage.getItem(VIEW_KEY) || "grid"; } catch {}
 
     const apply = (v) => {
       view = v;
@@ -207,9 +231,7 @@
         if (iconList) iconList.style.display = "none";
         if (label) label.textContent = "Grid";
       }
-      try {
-        localStorage.setItem(VIEW_KEY, v);
-      } catch {}
+      try { localStorage.setItem(VIEW_KEY, v); } catch {}
     };
 
     apply(view);
@@ -336,6 +358,64 @@
     `;
   };
 
+  /* FILTERS */
+  const applyFilters = () => {
+    if (!cachedNotes) return;
+
+    const typeFilter = $("#typeFilter")?.value || "all";
+    const dateFilter = $("#dateFilter")?.value || "all";
+
+    let filtered = [...cachedNotes];
+
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(n => (n?.Type || "Note") === typeFilter);
+    }
+
+    if (dateFilter !== "all") {
+      const now = Date.now();
+      const cutoffs = {
+        month: 30 * 24 * 60 * 60 * 1000,
+        quarter: 90 * 24 * 60 * 60 * 1000,
+        year: 365 * 24 * 60 * 60 * 1000
+      };
+      const cutoff = cutoffs[dateFilter];
+      if (cutoff) {
+        filtered = filtered.filter(n => {
+          const date = new Date(n?.Published || n?.Date || n?.Created || 0);
+          return (now - date.getTime()) <= cutoff;
+        });
+      }
+    }
+
+    filteredNotes = filtered;
+    displayedCount = ITEMS_PER_PAGE;
+    renderFeed();
+  };
+
+  const initFilters = () => {
+    const typeFilter = $("#typeFilter");
+    const dateFilter = $("#dateFilter");
+
+    if (typeFilter) typeFilter.addEventListener("change", applyFilters);
+    if (dateFilter) dateFilter.addEventListener("change", applyFilters);
+  };
+
+  const populateTypeFilter = () => {
+    if (!cachedNotes) return;
+    
+    const types = new Set(cachedNotes.map(n => n?.Type || "Note"));
+    const typeFilter = $("#typeFilter");
+    
+    if (typeFilter) {
+      types.forEach(type => {
+        const opt = document.createElement("option");
+        opt.value = type;
+        opt.textContent = type;
+        typeFilter.appendChild(opt);
+      });
+    }
+  };
+
   /* MODALS */
   const openTextModal = ({ title, type, date, excerpt, url }) => {
     if (isMobile()) {
@@ -382,7 +462,6 @@
       if (e.target.classList.contains('modal-backdrop')) closeModal();
     };
 
-    // Keyboard navigation
     const handleKey = (e) => {
       if (e.key === "Escape") closeModal();
     };
@@ -391,7 +470,6 @@
       document.removeEventListener("keydown", handleKey);
     }, { once: true });
 
-    // Focus trap
     close.focus();
   };
 
@@ -464,7 +542,6 @@
     close.onclick = closeLightbox;
     backdrop.onclick = closeLightbox;
 
-    // Keyboard navigation
     const handleKey = (e) => {
       if (e.key === "Escape") closeLightbox();
     };
@@ -476,7 +553,7 @@
     close.focus();
   };
 
-  /* LOAD FIELD NOTES (CACHED) */
+  /* LOAD FIELD NOTES */
   async function fetchFieldNotes() {
     if (cachedNotes) return cachedNotes;
 
@@ -496,6 +573,7 @@
       });
 
       cachedNotes = posts;
+      filteredNotes = posts;
       setState('ready');
       return posts;
 
@@ -520,7 +598,6 @@
 
       const latest = notes[0];
       container.innerHTML = renderCard(latest, 0, true);
-
       attachCardListeners(container);
 
     } catch (err) {
@@ -529,28 +606,68 @@
     }
   }
 
+  function renderFeed() {
+    const feed = $("#fnFeed");
+    if (!feed) return;
+
+    const toShow = filteredNotes.slice(0, displayedCount);
+    
+    if (!toShow.length) {
+      feed.innerHTML = `<div class="fn-empty">No notes match your filters.</div>`;
+      updateLoadMore();
+      return;
+    }
+
+    feed.innerHTML = toShow.map(renderCard).join("");
+    attachCardListeners(feed);
+    updateLoadMore();
+  }
+
+  function updateLoadMore() {
+    const container = $("#loadMoreContainer");
+    const btn = $("#loadMoreBtn");
+    const shown = $("#itemsShown");
+
+    if (!container) return;
+
+    const hasMore = displayedCount < filteredNotes.length;
+    
+    if (hasMore) {
+      container.hidden = false;
+      if (shown) {
+        shown.textContent = `Showing ${displayedCount} of ${filteredNotes.length}`;
+      }
+    } else {
+      container.hidden = true;
+    }
+  }
+
+  function initLoadMore() {
+    const btn = $("#loadMoreBtn");
+    if (!btn) return;
+
+    btn.addEventListener("click", () => {
+      displayedCount += ITEMS_PER_PAGE;
+      renderFeed();
+    });
+  }
+
   async function loadFieldNotes() {
     const feed = $("#fnFeed");
     if (!feed) return;
 
     try {
       feed.setAttribute('aria-busy', 'true');
-      const posts = await fetchFieldNotes();
-
-      if (!posts.length) {
-        feed.innerHTML = `<div class="fn-empty">No public notes yet.</div>`;
-        feed.setAttribute('aria-busy', 'false');
-        return;
-      }
-
-      feed.innerHTML = posts.map(renderCard).join("");
+      await fetchFieldNotes();
+      
+      populateTypeFilter();
+      applyFilters();
+      
       feed.setAttribute('aria-busy', 'false');
-
-      attachCardListeners(feed);
 
     } catch (err) {
       console.error("Field Notes error:", err);
-      feed.innerHTML = `<div class="fn-empty error-state">Could not load Field Notes. Please try again later.</div>`;
+      feed.innerHTML = `<div class="fn-empty error-state">Could not load Field Notes.</div>`;
       feed.setAttribute('aria-busy', 'false');
     }
   }
@@ -582,9 +699,12 @@
   /* INIT */
   const init = () => {
     initTheme();
+    initMobileMenu();
     initMorphHeader();
     initRouting();
     initViewToggle();
+    initFilters();
+    initLoadMore();
     setState('ready');
     loadLatestNote();
     loadFieldNotes();

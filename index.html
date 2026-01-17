@@ -4,12 +4,35 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
-  <meta name="description" content="Systems that make the day run clean." />
-  <title>Scott Bertrand</title>
+  
+  <!-- SEO Meta Tags -->
+  <title>Scott Bertrand — Systems Developer & Brand Steward</title>
+  <meta name="description" content="Designing durable brand and operational systems with an emphasis on clarity, restraint, and long-term coherence." />
+  <meta name="author" content="Scott Bertrand" />
+  <meta name="keywords" content="brand systems, operational design, systems developer, brand steward, design systems" />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Scott Bertrand — Systems Developer & Brand Steward" />
+  <meta property="og:description" content="Designing durable brand and operational systems with an emphasis on clarity, restraint, and long-term coherence." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://scottbertrand.com" />
+  <meta property="og:image" content="https://scottbertrand.com/assets/scott-visual-black.png" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Scott Bertrand — Systems Developer & Brand Steward" />
+  <meta name="twitter:description" content="Designing durable brand and operational systems with an emphasis on clarity, restraint, and long-term coherence." />
+  <meta name="twitter:image" content="https://scottbertrand.com/assets/scott-visual-black.png" />
+  
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='6' fill='%23000'/%3E%3C/svg%3E">
+  
+  <!-- Styles -->
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
 <body>
@@ -18,97 +41,178 @@
   <header class="morph-header" id="morphHeader" role="banner">
     <div class="morph-inner">
       
+      <!-- Indicators -->
       <div class="indicator-pills" role="status" aria-label="System status">
         <span class="pill red" aria-label="Offline indicator"></span>
         <span class="pill amber" aria-label="Active indicator"></span>
         <span class="pill green" aria-label="Ready indicator"></span>
       </div>
 
-      <button class="speaker-grille" id="grilleBtn" aria-label="Return to top">
-        <img
-          src="./assets/scott-visual-black.png"
-          data-src-light="./assets/scott-visual-black.png"
-          data-src-dark="./assets/scott-visual-white.png"
-          alt="Scott Bertrand visual mark"
-        />
-      </button>
+      <!-- Logo Lockup (Grille + Wordmark) -->
+      <div class="logo-lockup">
+        <button class="speaker-grille" id="grilleBtn" aria-label="Return to top">
+          <img
+            src="./assets/scott-visual-black.png"
+            data-src-light="./assets/scott-visual-black.png"
+            data-src-dark="./assets/scott-visual-white.png"
+            alt="Scott Bertrand visual mark"
+          />
+        </button>
 
-      <div class="brand-wordmark">
-        <img
-          src="./assets/scott-wordmark-black.png"
-          data-src-light="./assets/scott-wordmark-black.png"
-          data-src-dark="./assets/scott-wordmark-white.png"
-          alt="Scott Bertrand"
-        />
+        <div class="brand-wordmark">
+          <img
+            src="./assets/scott-wordmark-black.png"
+            data-src-light="./assets/scott-wordmark-black.png"
+            data-src-dark="./assets/scott-wordmark-white.png"
+            alt="Scott Bertrand"
+          />
+        </div>
       </div>
 
-      <nav class="morph-nav" role="navigation" aria-label="Main navigation">
-        <button class="nav-btn" id="themeToggle" aria-label="Toggle light and dark theme">
+      <!-- Desktop Nav -->
+      <nav class="desktop-nav" role="navigation" aria-label="Main navigation">
+        <button class="nav-link" data-route="about">About</button>
+        <button class="nav-link" data-route="field-notes">Field Notes</button>
+        <a class="nav-link" href="mailto:scott.bertrand@outlook.com">Contact</a>
+        <button class="nav-link theme-btn" id="themeToggle" aria-label="Toggle theme">
           <span class="theme-icon">☀️</span>
-          <span class="nav-label">Theme</span>
-        </button>
-        <button class="nav-btn" data-route="field-notes" aria-label="View Field Notes">
-          <span class="nav-label">Field Notes</span>
         </button>
       </nav>
 
+      <!-- Mobile Menu Button -->
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
     </div>
   </header>
+
+  <!-- MOBILE MENU DRAWER -->
+  <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="mobile-menu-backdrop"></div>
+    <div class="mobile-menu-panel">
+      <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">×</button>
+      <nav class="mobile-menu-nav" role="navigation">
+        <button class="mobile-nav-link" data-route="about">About</button>
+        <button class="mobile-nav-link" data-route="field-notes">Field Notes</button>
+        <a class="mobile-nav-link" href="mailto:scott.bertrand@outlook.com">Contact</a>
+        <div class="mobile-nav-divider"></div>
+        <button class="mobile-nav-link mobile-theme-btn" id="mobileThemeToggle">
+          <span>Theme</span>
+          <span class="mobile-theme-icon">☀️</span>
+        </button>
+      </nav>
+    </div>
+  </div>
 
   <!-- MAIN SITE -->
   <div class="site-shell" id="mainSite" data-page="home">
     
     <main class="main-content" role="main">
       
-      <section class="statement" aria-labelledby="statement-text">
-        <p id="statement-text">I work across operations and brand systems to reduce friction where performance slips quietly — at the counter, in handoffs, and in the routines teams rely on.</p>
-        <a href="mailto:hello@scottbertrand.com" class="contact-btn">Contact</a>
+      <!-- Hero -->
+      <section class="hero" aria-labelledby="hero-title">
+        <h1 id="hero-title" class="hero-title">Systems Developer & Brand Steward</h1>
+        <p class="hero-text">Designing durable brand and operational systems with an emphasis on clarity, restraint, and long-term coherence.</p>
       </section>
 
+      <!-- About Section -->
+      <section class="about-section" id="aboutSection" aria-labelledby="about-title">
+        <h2 id="about-title" class="section-title">About</h2>
+        <div class="about-content">
+          <p>I work at the intersection of brand, systems, and operations — designing structures that are meant to last.</p>
+          <p>My focus is not surface aesthetics, but coherence: how identity, behavior, tools, and decision-making align over time. I approach brands the way engineers approach systems and stewards approach environments — with restraint, clarity, and respect for longevity.</p>
+          <p>My work spans identity, experience design, operational frameworks, and internal systems, always with the goal of reducing noise, increasing signal, and building things that age well.</p>
+          <p>This practice values durability over novelty, and thoughtfulness over scale.</p>
+        </div>
+      </section>
+
+      <!-- Latest Field Note -->
       <section class="latest-note" id="latestNote" aria-labelledby="latest-note-title">
         <div class="section-header">
           <h2 id="latest-note-title" class="section-title">Latest Field Note</h2>
           <button class="view-all-btn" data-route="field-notes">View all →</button>
         </div>
         <div class="latest-note-card" id="latestNoteCard">
-          <div class="loading-state">Loading latest note…</div>
+          <div class="loading-card">
+            <div class="loading-spinner"></div>
+            <p>Loading latest note…</p>
+          </div>
         </div>
       </section>
 
     </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+      <p>&copy; 2026 Scott Bertrand. All rights reserved.</p>
+    </footer>
 
   </div>
 
   <!-- FIELD NOTES PAGE -->
   <div class="field-notes-shell" id="fieldNotes" data-page="field-notes" hidden>
     
-    <header class="fn-header">
-      <button class="fn-mark-btn" data-route="home" aria-label="Return to homepage">
-        <img src="./assets/marks/field-notes.png" alt="Field Notes" class="fn-mark" />
-      </button>
-      
-      <div class="fn-controls">
-        <button class="fn-btn" id="viewToggle" aria-label="Toggle grid and list view">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-grid" aria-hidden="true">
-            <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-            <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-list" style="display:none;" aria-hidden="true">
-            <line x1="2" y1="3" x2="14" y2="3" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="2" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-          <span class="fn-label">Grid</span>
-        </button>
-        <button class="fn-btn" data-route="home" aria-label="Return to homepage">Close</button>
+    <div class="fn-hero">
+      <img 
+        src="./assets/marks/field-notes.png" 
+        data-src-light="./assets/marks/field-notes.png"
+        data-src-dark="./assets/marks/field-notes-white.png"
+        alt="Field Notes" 
+        class="fn-logo" 
+      />
+      <p class="fn-tagline">Fragments, observations, and working material collected over time.</p>
+      <p class="fn-subtitle">Images, text, and references — shared without hierarchy or polish.</p>
+    </div>
+
+    <div class="fn-controls-bar">
+      <div class="fn-filters">
+        <select id="typeFilter" class="fn-filter" aria-label="Filter by type">
+          <option value="all">All Types</option>
+        </select>
+        <select id="dateFilter" class="fn-filter" aria-label="Filter by date">
+          <option value="all">All Time</option>
+          <option value="month">Past Month</option>
+          <option value="quarter">Past Quarter</option>
+          <option value="year">Past Year</option>
+        </select>
       </div>
-    </header>
+      <button class="fn-btn" id="viewToggle" aria-label="Toggle view">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-grid" aria-hidden="true">
+          <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="icon-list" style="display:none;" aria-hidden="true">
+          <line x1="2" y1="3" x2="14" y2="3" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="2" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <span class="fn-label">Grid</span>
+      </button>
+    </div>
 
     <div class="fn-feed" id="fnFeed" role="feed" aria-busy="true">
-      <div class="fn-empty">Loading Field Notes…</div>
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading Field Notes…</p>
+      </div>
     </div>
+
+    <div class="fn-load-more" id="loadMoreContainer" hidden>
+      <button class="load-more-btn" id="loadMoreBtn">Load More</button>
+      <p class="items-shown" id="itemsShown"></p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+      <p>&copy; 2026 Scott Bertrand. All rights reserved.</p>
+    </footer>
 
   </div>
 
