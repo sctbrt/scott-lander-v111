@@ -737,7 +737,7 @@
     if (philosophy) observer.observe(philosophy);
   };
 
-  /* PRELUDE / BOOT SEQUENCE */
+  /* PRELUDE / BOOT SEQUENCE - 90s Computer Tower Boot */
   const initPrelude = () => {
     const PRELUDE_KEY = "sb_prelude_shown";
     const prelude = $("#preludeOverlay");
@@ -754,27 +754,31 @@
 
     const indicators = $$(".pill", prelude);
 
-    // Phase 1: Presence (indicators appear) - 0-600ms
-    // Already handled by CSS fadeIn animation
+    // Phase 1: Indicators boot sequence - 0-400ms
+    // Red appears first (CSS bootIndicators animation handles fadeIn)
+    // Already handled by CSS animation
 
-    // Phase 2: Active (amber pulses) - 800ms-2000ms
+    // Phase 2: Amber activates - 200ms
     setTimeout(() => {
       if (indicators[1]) {
-        indicators[1].style.animation = "amberPulse 1200ms linear 1";
+        indicators[1].style.animation = "amberPulse 600ms linear 1";
       }
-    }, 800);
+    }, 200);
 
-    // Phase 3: Ready (green blooms) - 2000ms-2600ms
+    // Phase 3: Green ready - 600ms
     setTimeout(() => {
       if (indicators[2]) {
-        indicators[2].style.animation = "greenBloom 800ms linear 1";
+        indicators[2].style.animation = "greenBloom 400ms linear 1";
       }
-    }, 2000);
+    }, 600);
 
-    // Phase 4: Mark & wordmark reveal - 1400ms-2800ms
-    // Handled by CSS animations
+    // Phase 4: Lockup reveal - 400ms-1000ms
+    // Handled by CSS bootLockup animation
 
-    // Phase 5: Exit - 2800ms-3600ms
+    // Phase 5: Hold state - 1000ms-1800ms
+    // Let the full lockup be visible briefly
+
+    // Phase 6: Exit - 1800ms-2400ms
     setTimeout(() => {
       prelude.classList.add("hidden");
 
@@ -783,8 +787,8 @@
         try {
           sessionStorage.setItem(PRELUDE_KEY, "true");
         } catch {}
-      }, 800);
-    }, 2800);
+      }, 600);
+    }, 1800);
   };
 
   /* INIT */

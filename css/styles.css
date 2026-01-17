@@ -167,7 +167,7 @@ button {
   opacity: 0.38;
 }
 
-/* PRELUDE / BOOT SEQUENCE */
+/* PRELUDE / BOOT SEQUENCE - Horizontal 90s Computer Boot */
 .prelude-overlay {
   position: fixed;
   inset: 0;
@@ -178,7 +178,7 @@ button {
   display: grid;
   place-items: center;
   opacity: 1;
-  transition: opacity 800ms linear;
+  transition: opacity 600ms linear;
   pointer-events: none;
 }
 
@@ -192,28 +192,34 @@ button {
 
 .prelude-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 36px;
+  gap: 20px;
 }
 
 .prelude-indicators {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   opacity: 0;
-  animation: fadeIn 600ms linear forwards;
+  animation: bootIndicators 400ms linear forwards;
 }
 
 .prelude-indicators .pill {
-  opacity: 0.18;
+  opacity: 0.12;
+}
+
+.prelude-lockup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  animation: bootLockup 600ms linear 400ms forwards;
 }
 
 .prelude-mark {
-  width: 120px;
-  height: 120px;
-  opacity: 0;
-  transform: scale(0.94);
-  animation: revealMark 1000ms linear 1400ms forwards;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
 }
 
 .prelude-mark img {
@@ -223,10 +229,7 @@ button {
 }
 
 .prelude-wordmark {
-  max-width: 280px;
-  opacity: 0;
-  transform: translateY(8px);
-  animation: revealWordmark 800ms linear 2000ms forwards;
+  max-width: 200px;
 }
 
 .prelude-wordmark img {
@@ -234,22 +237,12 @@ button {
   height: auto;
 }
 
-@keyframes fadeIn {
+@keyframes bootIndicators {
   to { opacity: 1; }
 }
 
-@keyframes revealMark {
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes revealWordmark {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes bootLockup {
+  to { opacity: 1; }
 }
 
 /* MORPHING HEADER - Mechanical reconfiguration, fully reversible */
@@ -1656,13 +1649,21 @@ body.header-morphed .field-notes-shell {
     right: 16px;
   }
 
+  .prelude-content {
+    gap: 14px;
+  }
+
+  .prelude-lockup {
+    gap: 12px;
+  }
+
   .prelude-mark {
-    width: 90px;
-    height: 90px;
+    width: 32px;
+    height: 32px;
   }
 
   .prelude-wordmark {
-    max-width: 220px;
+    max-width: 160px;
   }
 }
 
