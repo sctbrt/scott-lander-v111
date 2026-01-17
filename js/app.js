@@ -743,9 +743,9 @@
     const prelude = $("#preludeOverlay");
     if (!prelude) return;
 
-    // Check if prelude has been shown this session
+    // Check if prelude has been shown (ever)
     try {
-      const shown = sessionStorage.getItem(PRELUDE_KEY);
+      const shown = localStorage.getItem(PRELUDE_KEY);
       if (shown === "true") {
         prelude.classList.add("exited");
         return;
@@ -785,7 +785,7 @@
       setTimeout(() => {
         prelude.classList.add("exited");
         try {
-          sessionStorage.setItem(PRELUDE_KEY, "true");
+          localStorage.setItem(PRELUDE_KEY, "true");
         } catch {}
       }, 600);
     }, 1800);
