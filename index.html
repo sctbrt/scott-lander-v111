@@ -37,6 +37,33 @@
 </head>
 <body>
 
+  <!-- PRELUDE / BOOT SEQUENCE -->
+  <div class="prelude-overlay" id="preludeOverlay" aria-hidden="true">
+    <div class="prelude-content">
+      <div class="prelude-indicators">
+        <span class="pill red"></span>
+        <span class="pill amber"></span>
+        <span class="pill green"></span>
+      </div>
+      <div class="prelude-mark">
+        <img
+          src="./assets/scott-visual-black.png"
+          data-src-light="./assets/scott-visual-black.png"
+          data-src-dark="./assets/scott-visual-white.png"
+          alt="Scott Bertrand"
+        />
+      </div>
+      <div class="prelude-wordmark">
+        <img
+          src="./assets/scott-wordmark-black.png"
+          data-src-light="./assets/scott-wordmark-black.png"
+          data-src-dark="./assets/scott-wordmark-white.png"
+          alt="Scott Bertrand"
+        />
+      </div>
+    </div>
+  </div>
+
   <!-- MORPHING HEADER -->
   <header class="morph-header" id="morphHeader" role="banner">
     <div class="morph-inner">
@@ -72,8 +99,9 @@
       <!-- Desktop Nav -->
       <nav class="desktop-nav" role="navigation" aria-label="Main navigation">
         <button class="nav-link" data-route="about">About</button>
+        <button class="nav-link" data-route="philosophy">Philosophy</button>
         <button class="nav-link" data-route="field-notes">Field Notes</button>
-        <a class="nav-link" href="mailto:scott.bertrand@outlook.com">Contact</a>
+        <a class="nav-link" href="mailto:bertrandbrands@outlook.com">Contact</a>
         <button class="nav-link theme-btn" id="themeToggle" aria-label="Toggle theme">
           <span class="theme-icon">☀️</span>
         </button>
@@ -98,8 +126,9 @@
       <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">×</button>
       <nav class="mobile-menu-nav" role="navigation">
         <button class="mobile-nav-link" data-route="about">About</button>
+        <button class="mobile-nav-link" data-route="philosophy">Philosophy</button>
         <button class="mobile-nav-link" data-route="field-notes">Field Notes</button>
-        <a class="mobile-nav-link" href="mailto:scott.bertrand@outlook.com">Contact</a>
+        <a class="mobile-nav-link" href="mailto:bertrandbrands@outlook.com">Contact</a>
         <div class="mobile-nav-divider"></div>
         <button class="mobile-nav-link mobile-theme-btn" id="mobileThemeToggle">
           <span>Theme</span>
@@ -125,9 +154,18 @@
         <h2 id="about-title" class="section-title">About</h2>
         <div class="about-content">
           <p>I work at the intersection of brand, systems, and operations — designing structures that are meant to last.</p>
-          <p>My focus is not surface aesthetics, but coherence: how identity, behavior, tools, and decision-making align over time. I approach brands the way engineers approach systems and stewards approach environments — with restraint, clarity, and respect for longevity.</p>
+          <p>My focus is not surface aesthetics, but coherence: how identity, behavior, tools, and decision-making align over time.</p>
+        </div>
+      </section>
+
+      <!-- Design Philosophy Section -->
+      <section class="philosophy-section" id="philosophySection" aria-labelledby="philosophy-title">
+        <h2 id="philosophy-title" class="section-title">Design Philosophy</h2>
+        <div class="philosophy-content">
+          <p>I approach brands the way engineers approach systems and stewards approach environments — with restraint, clarity, and respect for longevity.</p>
           <p>My work spans identity, experience design, operational frameworks, and internal systems, always with the goal of reducing noise, increasing signal, and building things that age well.</p>
           <p>This practice values durability over novelty, and thoughtfulness over scale.</p>
+          <p>Nothing should appear accidental. Everything should hold.</p>
         </div>
       </section>
 

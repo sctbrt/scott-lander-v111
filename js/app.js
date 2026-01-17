@@ -177,7 +177,8 @@
     const main = $("#mainSite");
     const fn = $("#fieldNotes");
     const about = $("#aboutSection");
-    
+    const philosophy = $("#philosophySection");
+
     if (route === "field-notes") {
       if (main) main.hidden = true;
       if (fn) fn.hidden = false;
@@ -187,6 +188,12 @@
       if (fn) fn.hidden = true;
       if (about) {
         about.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else if (route === "philosophy") {
+      if (main) main.hidden = false;
+      if (fn) fn.hidden = true;
+      if (philosophy) {
+        philosophy.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else {
       if (main) main.hidden = false;
@@ -698,9 +705,60 @@
     });
   }
 
+  /* PRELUDE / BOOT SEQUENCE */
+  const initPrelude = () => {
+    const PRELUDE_KEY = "sb_prelude_shown";
+    const prelude = $("#preludeOverlay");
+    if (!prelude) return;
+
+    // Check if prelude has been shown this session
+    try {
+      const shown = sessionStorage.getItem(PRELUDE_KEY);
+      if (shown === "true") {
+        prelude.classList.add("exited");
+        return;
+      }
+    } catch {}
+
+    const indicators = $$(".pill", prelude);
+
+    // Phase 1: Presence (indicators appear) - 0-600ms
+    // Already handled by CSS fadeIn animation
+
+    // Phase 2: Active (amber pulses) - 800ms-2000ms
+    setTimeout(() => {
+      if (indicators[1]) {
+        indicators[1].style.animation = "amberPulse 1200ms linear 1";
+      }
+    }, 800);
+
+    // Phase 3: Ready (green blooms) - 2000ms-2600ms
+    setTimeout(() => {
+      if (indicators[2]) {
+        indicators[2].style.animation = "greenBloom 800ms linear 1";
+      }
+    }, 2000);
+
+    // Phase 4: Mark & wordmark reveal - 1400ms-2800ms
+    // Handled by CSS animations
+
+    // Phase 5: Exit - 2800ms-3600ms
+    setTimeout(() => {
+      prelude.classList.add("hidden");
+
+      setTimeout(() => {
+        prelude.classList.add("exited");
+        try {
+          sessionStorage.setItem(PRELUDE_KEY, "true");
+        } catch {}
+      }, 800);
+    }, 2800);
+  };
+
   /* INIT */
   const init = () => {
     initTheme();
+    initPrelude();
     initMobileMenu();
     initMorphHeader();
     initRouting();

@@ -167,6 +167,91 @@ button {
   opacity: 0.38;
 }
 
+/* PRELUDE / BOOT SEQUENCE */
+.prelude-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--glass);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  display: grid;
+  place-items: center;
+  opacity: 1;
+  transition: opacity 800ms linear;
+  pointer-events: none;
+}
+
+.prelude-overlay.hidden {
+  opacity: 0;
+}
+
+.prelude-overlay.exited {
+  display: none;
+}
+
+.prelude-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+.prelude-indicators {
+  display: flex;
+  gap: 14px;
+  opacity: 0;
+  animation: fadeIn 600ms linear forwards;
+}
+
+.prelude-indicators .pill {
+  opacity: 0.18;
+}
+
+.prelude-mark {
+  width: 200px;
+  height: 200px;
+  opacity: 0;
+  transform: scale(0.94);
+  animation: revealMark 1000ms linear 1400ms forwards;
+}
+
+.prelude-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.prelude-wordmark {
+  max-width: 400px;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: revealWordmark 800ms linear 2000ms forwards;
+}
+
+.prelude-wordmark img {
+  width: 100%;
+  height: auto;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes revealMark {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes revealWordmark {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* MORPHING HEADER - Mechanical reconfiguration, fully reversible */
 .morph-header {
   position: fixed;
@@ -569,6 +654,34 @@ body.header-morphed .field-notes-shell {
   font-weight: 400;
   letter-spacing: -0.005em;
   color: var(--text);
+}
+
+/* Design Philosophy Section */
+.philosophy-section {
+  padding: 100px 20px;
+  scroll-margin-top: 100px;
+  background: linear-gradient(180deg, transparent 0%, var(--surface) 100%);
+}
+
+.philosophy-content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 680px;
+}
+
+.philosophy-content p {
+  font-size: 18px;
+  line-height: 1.75;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+.philosophy-content p:last-child {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--text-muted);
 }
 
 /* Latest Note */
